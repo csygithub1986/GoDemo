@@ -12,10 +12,12 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.google.zxing.BarcodeFormat;
@@ -117,6 +119,21 @@ public class ScanActivity extends AppCompatActivity implements SurfaceHolder.Cal
             this.setResult(RESULT_OK, resultIntent);
         }
         ScanActivity.this.finish();
+    }
+
+    public void handleGoDetect(Result result, Bitmap barcode) {
+        inactivityTimer.onActivity();
+        Intent resultIntent = new Intent();
+        Bundle bundle = new Bundle();
+        bundle.putString("result", "abc");
+        bundle.putParcelable("bitmap", barcode);
+        resultIntent.putExtras(bundle);
+        resultIntent.setClass(ScanActivity.this, ResultActivity.class);
+        startActivity(resultIntent);
+        ScanActivity.this.finish();
+//        int bytecount = barcode.getByteCount();
+//        ImageView imageView = (ImageView) findViewById(R.id.imageView2);
+//        imageView.setImageBitmap(barcode);
     }
 
     private void initCamera(SurfaceHolder surfaceHolder) {
