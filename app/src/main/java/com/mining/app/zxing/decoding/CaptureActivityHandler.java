@@ -93,7 +93,7 @@ public final class CaptureActivityHandler extends Handler {
 
                 /***********************************************************************/
                 Bitmap barcode = bundle == null ? null :
-                        (Bitmap) bundle.getParcelable(DecodeThread.BARCODE_BITMAP);//���ñ����߳�
+                        (Bitmap) bundle.getParcelable(DecodeThread.BARCODE_BITMAP);
 
                 activity.handleDecode((Result) message.obj, barcode);//���ؽ��?        /***********************************************************************/
                 break;
@@ -120,7 +120,7 @@ public final class CaptureActivityHandler extends Handler {
 
                 /***********************************************************************/
                 barcode = bundle == null ? null :
-                        (Bitmap) bundle.getParcelable(DecodeThread.BARCODE_BITMAP);//���ñ����߳�
+                        (Bitmap) bundle.getParcelable(DecodeThread.BARCODE_BITMAP);
 //
 //
 //                ByteArrayOutputStream baos = null;
@@ -133,7 +133,7 @@ public final class CaptureActivityHandler extends Handler {
 //                }
 
 
-                activity.handleGoDetect((Result) message.obj, barcode);//���ؽ��?        /***********************************************************************/
+                activity.handleGoDetect((Result) message.obj, barcode);
                 break;
         }
     }
@@ -154,6 +154,10 @@ public final class CaptureActivityHandler extends Handler {
         removeMessages(R.id.decode_failed);
     }
 
+
+    /**
+     *
+     */
     private void restartPreviewAndDecode() {
         if (state == State.SUCCESS) {
             state = State.PREVIEW;

@@ -53,7 +53,7 @@ public class ScanActivity extends AppCompatActivity implements SurfaceHolder.Cal
         viewfinderView = (ViewfinderView) findViewById(R.id.viewfinder_view);
 
         hasSurface = false;
-        inactivityTimer = new InactivityTimer(this);
+        inactivityTimer = new InactivityTimer(this);//这是什么
 
     }
 
@@ -122,12 +122,13 @@ public class ScanActivity extends AppCompatActivity implements SurfaceHolder.Cal
     }
 
     public void handleGoDetect(Result result, Bitmap barcode) {
+        GlobalEnvironment.ScanedBitmap=barcode;
         inactivityTimer.onActivity();
         Intent resultIntent = new Intent();
-        Bundle bundle = new Bundle();
-        bundle.putString("result", "abc");
-        bundle.putParcelable("bitmap", barcode);
-        resultIntent.putExtras(bundle);
+//        Bundle bundle = new Bundle();
+//        bundle.putString("result", "abc");
+//        bundle.putParcelable("bitmap", barcode);
+//        resultIntent.putExtras(bundle);
         resultIntent.setClass(ScanActivity.this, ResultActivity.class);
         startActivity(resultIntent);
         ScanActivity.this.finish();

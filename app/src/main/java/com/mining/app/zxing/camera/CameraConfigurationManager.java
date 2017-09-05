@@ -18,6 +18,8 @@ package com.mining.app.zxing.camera;
 
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.ImageFormat;
+import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.hardware.Camera;
 import android.os.Build;
@@ -74,6 +76,9 @@ final class CameraConfigurationManager {
         Log.d(TAG, "Setting preview size: " + cameraResolution);
         //设置摄像机预览大小 csy注释
         parameters.setPreviewSize(cameraResolution.x, cameraResolution.y);
+        parameters.setPictureSize(cameraResolution.x, cameraResolution.y);
+        parameters.setPictureFormat(ImageFormat.JPEG);
+//        parameters.set("jpeg-quality", 85);
         setFlash(parameters);
         setZoom(parameters);
         camera.setParameters(parameters);

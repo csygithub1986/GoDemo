@@ -13,11 +13,11 @@ public class ResultActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_result);
 
-        Intent intent=getIntent();
-        Bundle bundle=intent.getExtras();
-        Bitmap bitmap = bundle.getParcelable("bitmap");
+//        Intent intent=getIntent();
+//        Bundle bundle=intent.getExtras();
+//        Bitmap bitmap = bundle.getParcelable("bitmap");
 
         ImageView imageView = (ImageView) findViewById(R.id.imageView);
-        imageView.setImageBitmap(bitmap);
+        imageView.setImageBitmap(GlobalEnvironment.ScanedBitmap);
     }
 }

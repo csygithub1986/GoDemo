@@ -28,7 +28,7 @@ final class PreviewCallback implements Camera.PreviewCallback {
 
   private final CameraConfigurationManager configManager;
   private final boolean useOneShotPreviewCallback;
-  private Handler previewHandler;
+  private Handler previewHandler;//相机预览结果通过它传出去
   private int previewMessage;
 
   PreviewCallback(CameraConfigurationManager configManager, boolean useOneShotPreviewCallback) {
@@ -41,6 +41,7 @@ final class PreviewCallback implements Camera.PreviewCallback {
     this.previewMessage = previewMessage;
   }
 
+
   public void onPreviewFrame(byte[] data, Camera camera) {
     Point cameraResolution = configManager.getCameraResolution();
     if (!useOneShotPreviewCallback) {
@@ -49,6 +50,10 @@ final class PreviewCallback implements Camera.PreviewCallback {
     if (previewHandler != null) {
       Message message = previewHandler.obtainMessage(previewMessage, cameraResolution.x,
           cameraResolution.y, data);
+      //生成bitmap
+
+
+
       message.sendToTarget();
       previewHandler = null;
     } else {

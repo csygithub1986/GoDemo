@@ -16,12 +16,24 @@
 
 package com.mining.app.zxing.decoding;
 
+import java.io.ByteArrayOutputStream;
 import java.util.Hashtable;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.ImageFormat;
+import android.graphics.Matrix;
+import android.graphics.Rect;
+import android.graphics.YuvImage;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.renderscript.Allocation;
+import android.renderscript.Element;
+import android.renderscript.RenderScript;
+import android.renderscript.ScriptIntrinsicYuvToRGB;
+import android.renderscript.Type;
 import android.util.Log;
 
 import com.example.godemo.ScanActivity;
@@ -42,7 +54,19 @@ final class DecodeHandler extends Handler {
     private final ScanActivity activity;
     private final MultiFormatReader multiFormatReader;
 
+
+    //bitmap生成相关字段
+    private RenderScript rs;
+    private ScriptIntrinsicYuvToRGB yuvToRgbIntrinsic;
+    private Type.Builder yuvType, rgbaType;
+    private Allocation in, out;
+
+
     DecodeHandler(ScanActivity activity, Hashtable<DecodeHintType, Object> hints) {
+
+        rs = RenderScript.create(activity);
+        yuvToRgbIntrinsic = ScriptIntrinsicYuvToRGB.create(rs, Element.U8_4(rs));
+
         multiFormatReader = new MultiFormatReader();
         multiFormatReader.setHints(hints);
         this.activity = activity;
@@ -73,22 +97,43 @@ final class DecodeHandler extends Handler {
         long start = System.currentTimeMillis();
         Result rawResult = null;
 
-        //modify here
-        byte[] rotatedData = new byte[data.length];
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++)
-                rotatedData[x * height + height - y - 1] = data[x + y * width];
-        }
-        int tmp = width; // Here we are swapping, that's the difference to #11
-        width = height;
-        height = tmp;
+//        //modify here
+//        byte[] rotatedData = new byte[data.length];
+//        for (int y = 0; y < height; y++) {
+//            for (int x = 0; x < width; x++)
+//                rotatedData[x * height + height - y - 1] = data[x + y * width];
+//        }
+//        int tmp = width; // Here we are swapping, that's the difference to #11
+//        width = height;
+//        height = tmp;
 
-        PlanarYUVLuminanceSource source = CameraManager.get().buildLuminanceSource(rotatedData, width, height);
-        BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
+
+        //生成bitmap
+        if (yuvType == null) {
+            yuvType = new Type.Builder(rs, Element.U8(rs)).setX(data.length);
+            in = Allocation.createTyped(rs, yuvType.create(), Allocation.USAGE_SCRIPT);
+
+            rgbaType = new Type.Builder(rs, Element.RGBA_8888(rs)).setX(width).setY(height);
+            out = Allocation.createTyped(rs, rgbaType.create(), Allocation.USAGE_SCRIPT);
+        }
+
+        in.copyFrom(data);
+
+        yuvToRgbIntrinsic.setInput(in);
+        yuvToRgbIntrinsic.forEach(out);
+
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        out.copyTo(bitmap);
+
+        //旋转
+        Matrix m = new Matrix();
+        m.setRotate(90, (float) bitmap.getWidth() / 2, (float) bitmap.getHeight() / 2);
+        bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true);
+
 
         Message message = Message.obtain(activity.getHandler(), R.id.goDetectSucceed, rawResult);
         Bundle bundle = new Bundle();
-        bundle.putParcelable(DecodeThread.BARCODE_BITMAP, source.renderCroppedGreyscaleBitmap());
+        bundle.putParcelable(DecodeThread.BARCODE_BITMAP, bitmap);
         message.setData(bundle);
         message.sendToTarget();
 
