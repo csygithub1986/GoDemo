@@ -24,8 +24,17 @@ JNIEXPORT jintArray JNICALL Java_com_go_algorithm_Detector_Detect
     }
     AndroidBitmap_unlockPixels(env, bitmap);
 
+
+    uchar *psrc = (uchar *) img.data;
+    vector<int> temp;
+    int leng = img.total();
+    for (int i = 0; i < leng; ++i) {
+        temp.push_back((int) psrc[i]);
+    }
+
+
     int result[boardSize * boardSize];
- int   success = Detect(img, w, h, 3, boardSize, result);
+    int success = Detect(img, w, h, 3, boardSize, result);
     if (!success)
         return nullptr;
     //1.新建长度len数组

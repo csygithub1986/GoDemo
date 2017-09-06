@@ -13,7 +13,10 @@
 #include "opencv/highgui.h"
 #include <opencv2/opencv.hpp>
 #include <opencv2/core.hpp>
-
+#include <android/log.h>
+//debug用
+#define LOG_TAG  "c_debug"
+#define LOGD(...)  __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
 
 using namespace cv;
 using namespace std;

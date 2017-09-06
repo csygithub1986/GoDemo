@@ -3,6 +3,7 @@ package com.example.godemo;
 import android.content.Intent;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
@@ -55,6 +56,8 @@ public class ScanActivity extends AppCompatActivity implements SurfaceHolder.Cal
         hasSurface = false;
         inactivityTimer = new InactivityTimer(this);//这是什么
 
+        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.test);
+        GlobalEnvironment.ScanedBitmap=bitmap;
     }
 
     @Override

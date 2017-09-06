@@ -23,6 +23,7 @@ import java.util.Vector;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -126,11 +127,18 @@ public final class CaptureActivityHandler extends Handler {
 
 
                 //解析图片，如果失败，不采纳
-                GlobalEnvironment.ScanedBitmap=img;
+//                GlobalEnvironment.ScanedBitmap = img;
+
                 int[] result = Detector.Detect(GlobalEnvironment.ScanedBitmap, GlobalEnvironment.ScanedBitmap.getWidth(), GlobalEnvironment.ScanedBitmap.getHeight(), 19);
                 if (result == null) {
                     state = State.PREVIEW;
                     CameraManager.get().requestPreviewFrame(decodeThread.getHandler(), R.id.decode);
+                    Log.d("detect", "不采纳");
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                     return;
 //                restartPreviewAndDecode();
                 }

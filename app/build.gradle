@@ -14,6 +14,7 @@ android {
             cmake {
                 cppFlags "-std=c++11 -frtti -fexceptions"
             }
+
         }
     }
     buildTypes {
@@ -30,10 +31,10 @@ android {
         }
     }
 
-//    android.ndk{
-//        moduleName="native-lib"                    //生成的so名字
-//        cppFlags.add( "-std=c++11")
-//        cppFlags.add( "-fexceptions")
+//    android.ndk {
+//        moduleName "native-lib"
+//        ldLibs "log", "z", "m"
+//        abiFilters "armeabi", "armeabi-v7a", "x86" //输出指定三种abi体系结构下的so库，目前可有可无。
 //    }
 
 }
