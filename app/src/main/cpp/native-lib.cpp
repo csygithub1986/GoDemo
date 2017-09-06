@@ -1,12 +1,12 @@
-#include "com_go_core_Detector.h"
+#include "com_go_algorithm_Detector.h"
 #include <android/bitmap.h>
 #include <opencv2/opencv.hpp>
+#include "CppTest.h"
 
 using namespace cv;
 
-JNIEXPORT jintArray JNICALL Java_com_go_core_Detector_Detect
-(JNIEnv *env, jclass thizz, jobject bitmap, jint w, jint h, jint boardSize)
-{
+JNIEXPORT jintArray JNICALL Java_com_go_algorithm_Detector_Detect
+        (JNIEnv *env, jclass thizz, jobject bitmap, jint w, jint h, jint boardSize) {
     AndroidBitmapInfo info;
     void *pixels;
 
@@ -15,18 +15,30 @@ JNIEXPORT jintArray JNICALL Java_com_go_core_Detector_Detect
               info.format == ANDROID_BITMAP_FORMAT_RGB_565);
     CV_Assert(AndroidBitmap_lockPixels(env, bitmap, &pixels) >= 0);
     CV_Assert(pixels);
+
+    Mat img;
     if (info.format == ANDROID_BITMAP_FORMAT_RGBA_8888) {
-        Mat temp(info.height, info.width, CV_8UC4, pixels);
-        Mat gray;
-        cvtColor(temp, gray, COLOR_RGBA2GRAY);
-        Canny(gray, gray, 3, 9, 3);
-        cvtColor(gray, temp, COLOR_GRAY2RGBA);
+        img = Mat(info.height, info.width, CV_8UC4, pixels);
     } else {
-        Mat temp(info.height, info.width, CV_8UC2, pixels);
-        Mat gray;
-        cvtColor(temp, gray, COLOR_RGB2GRAY);
-        Canny(gray, gray, 3, 9, 3);
-        cvtColor(gray, temp, COLOR_GRAY2RGB);
+        img = Mat(info.height, info.width, CV_8UC2, pixels);
     }
     AndroidBitmap_unlockPixels(env, bitmap);
+
+    int result[boardSize * boardSize];
+ int   success = Detect(img, w, h, 3, boardSize, result);
+    if (!success)
+        return nullptr;
+    //1.新建长度len数组
+    int len = boardSize * boardSize;
+    jintArray jarr = env->NewIntArray(len);
+    //2.获取数组指针
+    jint *arr = env->GetIntArrayElements(jarr, NULL);
+    //3.赋值
+    for (int i = 0; i < len; i++) {
+        arr[i] = result[i];
+    }
+    //4.释放资源
+    env->ReleaseIntArrayElements(jarr, arr, 0);
+    //5.返回数组
+    return jarr;
 }

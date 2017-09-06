@@ -71,7 +71,9 @@ enum CrossType {
 
 
 //导出函数
-void Detect(unsigned char *, int, int, int, int, int[]);
+bool Detect(unsigned char *, int, int, int, int, int[]);
+
+bool Detect(Mat, int, int, int, int, int[]);
 
 void SetConfig(double, double, double, double, double, double);
 
@@ -83,7 +85,7 @@ Mat InitImage(Mat);
 
 vector<CircleF> DetectCircle(Mat uimage, int boardSize);
 
-map<CrossType, list<Point>> DetectCross(uchar *imageBytes, int width, int height);
+map<CrossType, list<Point> > DetectCross(uchar *imageBytes, int width, int height);
 
 void LineFit(vector<Point2f> points, Point2f *direction, Point2f *pointOnLine);
 

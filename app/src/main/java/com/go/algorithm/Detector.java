@@ -1,4 +1,4 @@
-package com.go.core;
+package com.go.algorithm;
 
 import android.graphics.Bitmap;
 import android.graphics.Color;

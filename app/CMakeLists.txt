@@ -7,7 +7,7 @@ cmake_minimum_required(VERSION 3.4.1)
 
 # ##################### OpenCV 环境 ############################
 #设置OpenCV-android-sdk路径
-set(OpenCV_DIR G:/OpenCV-android-sdk/sdk/native/jni)
+set(OpenCV_DIR F:/OpenCV-android-sdk/sdk/native/jni)
 
 find_package(OpenCV REQUIRED )
 if(OpenCV_FOUND)
@@ -33,7 +33,8 @@ add_library( # Sets the name of the library.
              SHARED
 
              # Provides a relative path to your source file(s).
-             src/main/cpp/native-lib.cpp )
+             src/main/cpp/native-lib.cpp
+             src/main/cpp/CppTest.cpp)
 
 # Searches for a specified prebuilt library and stores the path as a
 # variable. Because CMake includes system libraries in the search path by

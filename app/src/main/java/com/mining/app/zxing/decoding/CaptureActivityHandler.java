@@ -29,9 +29,11 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
+import com.example.godemo.GlobalEnvironment;
 import com.example.godemo.ResultActivity;
 import com.example.godemo.ScanActivity;
 import com.example.godemo.R;
+import com.go.algorithm.Detector;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.Result;
 import com.mining.app.zxing.camera.CameraManager;
@@ -92,10 +94,10 @@ public final class CaptureActivityHandler extends Handler {
                 Bundle bundle = message.getData();
 
                 /***********************************************************************/
-                Bitmap barcode = bundle == null ? null :
+                Bitmap img = bundle == null ? null :
                         (Bitmap) bundle.getParcelable(DecodeThread.BARCODE_BITMAP);
 
-                activity.handleDecode((Result) message.obj, barcode);//���ؽ��?        /***********************************************************************/
+                activity.handleDecode((Result) message.obj, img);//���ؽ��?        /***********************************************************************/
                 break;
             case R.id.decode_failed:
                 // We're decoding as fast as possible, so when one decode fails, start another.
@@ -119,21 +121,21 @@ public final class CaptureActivityHandler extends Handler {
                 bundle = message.getData();
 
                 /***********************************************************************/
-                barcode = bundle == null ? null :
+                img = bundle == null ? null :
                         (Bitmap) bundle.getParcelable(DecodeThread.BARCODE_BITMAP);
-//
-//
-//                ByteArrayOutputStream baos = null;
-//                baos = new ByteArrayOutputStream();
-//                barcode.compress(Bitmap.CompressFormat.JPEG, 50, baos);
-//                try {
-//                    baos.close();
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
 
 
-                activity.handleGoDetect((Result) message.obj, barcode);
+                //解析图片，如果失败，不采纳
+                GlobalEnvironment.ScanedBitmap=img;
+                int[] result = Detector.Detect(GlobalEnvironment.ScanedBitmap, GlobalEnvironment.ScanedBitmap.getWidth(), GlobalEnvironment.ScanedBitmap.getHeight(), 19);
+                if (result == null) {
+                    state = State.PREVIEW;
+                    CameraManager.get().requestPreviewFrame(decodeThread.getHandler(), R.id.decode);
+                    return;
+//                restartPreviewAndDecode();
+                }
+
+                activity.handleGoDetect((Result) message.obj, img);
                 break;
         }
     }

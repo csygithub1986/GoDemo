@@ -10,6 +10,11 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        externalNativeBuild {
+            cmake {
+                cppFlags "-std=c++11 -frtti -fexceptions"
+            }
+        }
     }
     buildTypes {
         release {
@@ -17,13 +22,19 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    productFlavors {
-    }
+//    productFlavors {
+//    }
     externalNativeBuild {
         cmake {
             path "CMakeLists.txt"
         }
     }
+
+//    android.ndk{
+//        moduleName="native-lib"                    //生成的so名字
+//        cppFlags.add( "-std=c++11")
+//        cppFlags.add( "-fexceptions")
+//    }
 
 }
 
