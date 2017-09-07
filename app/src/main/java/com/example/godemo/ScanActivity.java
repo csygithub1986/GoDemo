@@ -3,22 +3,15 @@ package com.example.godemo;
 import android.content.Intent;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.view.View;
-import android.widget.Button;
-import android.widget.ImageView;
+import android.widget.TabHost;
 import android.widget.Toast;
 
 import com.google.zxing.BarcodeFormat;
@@ -43,6 +36,7 @@ public class ScanActivity extends AppCompatActivity implements SurfaceHolder.Cal
     private boolean playBeep;
     private static final float BEEP_VOLUME = 0.10f;
     private boolean vibrate;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

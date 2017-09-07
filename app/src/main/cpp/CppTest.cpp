@@ -39,7 +39,7 @@ bool Detect(Mat img, int w, int h, int channel, int boardSize, int result[]) {
 //    LOGD("c++检测,ImageWidth: %d",ImageWidth);
 //    LOGD("c++检测,ImageHeight: %d",ImageHeight);
     LOGD("c++检测,MaxGridWidth: %d", MaxGridWidth);
-    LOGD("c++检测,MinGridWidth: %d",MinGridWidth);
+    LOGD("c++检测,MinGridWidth: %d", MinGridWidth);
 //    LOGD("c++检测,CrossDetectLen: %d",CrossDetectLen);
 
     //初始化，灰度、降噪
@@ -74,7 +74,8 @@ bool Detect(Mat img, int w, int h, int channel, int boardSize, int result[]) {
     Conors = FindConor(&directionLeft, &directionRight, &directionUp, &directionDown);
 
     //斜率必须满足条件
-    if (directionLeft.y == 0 || directionRight.y == 0 || directionUp.x == 0 || directionDown.x == 0) {
+    if (directionLeft.y == 0 || directionRight.y == 0 || directionUp.x == 0 ||
+        directionDown.x == 0) {
         LOGD("斜率除数为0");
         return false;
     }
@@ -91,7 +92,7 @@ bool Detect(Mat img, int w, int h, int channel, int boardSize, int result[]) {
         LOGD("没找到角");
         return false;
     }
-    int small = MinGridWidth/2;
+    int small = MinGridWidth / 2;
     int big = MaxGridWidth * 3;
     int bigMinX = ImageWidth - big;
     int bigMaxX = ImageWidth - small;
@@ -100,9 +101,12 @@ bool Detect(Mat img, int w, int h, int channel, int boardSize, int result[]) {
 
 
     if (Conors[0].x < small || Conors[0].x > big || Conors[0].y < small || Conors[0].y > big ||
-        Conors[1].x < bigMinX || Conors[1].x > bigMaxX || Conors[1].y < small || Conors[1].y > big ||
-        Conors[2].x < bigMinX || Conors[2].x > bigMaxX || Conors[2].y > bigMaxY || Conors[2].y < bigMinY ||
-        Conors[3].x < small || Conors[3].x > big || Conors[3].y > bigMaxY || Conors[3].y < bigMinY) {
+        Conors[1].x < bigMinX || Conors[1].x > bigMaxX || Conors[1].y < small ||
+        Conors[1].y > big ||
+        Conors[2].x < bigMinX || Conors[2].x > bigMaxX || Conors[2].y > bigMaxY ||
+        Conors[2].y < bigMinY ||
+        Conors[3].x < small || Conors[3].x > big || Conors[3].y > bigMaxY ||
+        Conors[3].y < bigMinY) {
         LOGD("角超出范围");
         return false;
     }
@@ -784,11 +788,14 @@ void GetEvenDevideLines(Point2f *conors, Point2f directionLeft, Point2f directio
         //从上面画线时，都从1画到n/2-1，从下面画线时，从n-2画到n/2。当奇偶不同时，从下划线条数不同，但代码一致。
         for (int i = 0; i < BoardSize / 2 - 1; i++) {
             //从左上和右上开始，往对边画对角线，然后求平行的第1、2...n/2-1条线
-            LineSegment2DF diagonalLineUp1 = LineSegment2DF(leftPoints[i], downPoints[BoardSize - i - 1]);
+            LineSegment2DF diagonalLineUp1 = LineSegment2DF(leftPoints[i],
+                                                            downPoints[BoardSize - i - 1]);
             LineSegment2DF diagonalLineUp2 = LineSegment2DF(rightPoints[i], downPoints[i]);
             //和第1,n-2条垂直线交点
-            Point2f pLeft = FindLineCross(diagonalLineUp1.Direction, diagonalLineUp1.P1, verticalLines[1].Direction, verticalLines[1].P1);
-            Point2f pRight = FindLineCross(diagonalLineUp2.Direction, diagonalLineUp2.P1, verticalLines[BoardSize - 2].Direction,
+            Point2f pLeft = FindLineCross(diagonalLineUp1.Direction, diagonalLineUp1.P1,
+                                          verticalLines[1].Direction, verticalLines[1].P1);
+            Point2f pRight = FindLineCross(diagonalLineUp2.Direction, diagonalLineUp2.P1,
+                                           verticalLines[BoardSize - 2].Direction,
                                            verticalLines[BoardSize - 2].P1);
             horizontalLines[i + 1] = LineSegment2DF(pLeft, pRight);
             leftPoints[i + 1] = FindLineCross(horizontalLines[i + 1].Direction, pLeft,
@@ -800,13 +807,20 @@ void GetEvenDevideLines(Point2f *conors, Point2f directionLeft, Point2f directio
         for (int i = BoardSize - 1; i > BoardSize / 2; i--) {
             //从左下和右下开始，往对边画对角线，然后求平行的第n-2、n-3..n/2条线
             LineSegment2DF diagonalLineDown1 = LineSegment2DF(leftPoints[i], upPoints[i]);
-            LineSegment2DF diagonalLineDown2 = LineSegment2DF(rightPoints[i], upPoints[BoardSize - 1 - i]);
+            LineSegment2DF diagonalLineDown2 = LineSegment2DF(rightPoints[i],
+                                                              upPoints[BoardSize - 1 - i]);
             //和第1,n-2条垂直线交点
-            Point2f pLeft = FindLineCross(diagonalLineDown1.Direction, diagonalLineDown1.P1, verticalLines[1].Direction, verticalLines[1].P1);
-            Point2f pRight = FindLineCross(diagonalLineDown2.Direction, diagonalLineDown2.P1, verticalLines[BoardSize - 2].Direction, verticalLines[BoardSize - 2].P1);
+            Point2f pLeft = FindLineCross(diagonalLineDown1.Direction, diagonalLineDown1.P1,
+                                          verticalLines[1].Direction, verticalLines[1].P1);
+            Point2f pRight = FindLineCross(diagonalLineDown2.Direction, diagonalLineDown2.P1,
+                                           verticalLines[BoardSize - 2].Direction,
+                                           verticalLines[BoardSize - 2].P1);
             horizontalLines[i - 1] = LineSegment2DF(pLeft, pRight);
-            leftPoints[i - 1] = FindLineCross(horizontalLines[i - 1].Direction, pLeft, verticalLines[0].Direction, verticalLines[0].P1);
-            rightPoints[i - 1] = FindLineCross(horizontalLines[i - 1].Direction, pRight, verticalLines[BoardSize - 1].Direction, verticalLines[BoardSize - 1].P1);
+            leftPoints[i - 1] = FindLineCross(horizontalLines[i - 1].Direction, pLeft,
+                                              verticalLines[0].Direction, verticalLines[0].P1);
+            rightPoints[i - 1] = FindLineCross(horizontalLines[i - 1].Direction, pRight,
+                                               verticalLines[BoardSize - 1].Direction,
+                                               verticalLines[BoardSize - 1].P1);
         }
     }
     if (verticalParallel && !horizontalParallel) {
@@ -979,7 +993,7 @@ int FindStone(int index, uchar *cannyBytes, uchar *grayImageData) {
             }
         }
 
-
+        bool realCircle = false;
         if (circleStone.Radius == 0) {
             //或者以0.25倍最小格宽为半径的圆，百分之99（数值待定）都是黑色，判定为有圆
             int totalCannyCount = 0;
@@ -998,9 +1012,13 @@ int FindStone(int index, uchar *cannyBytes, uchar *grayImageData) {
             if ((float) blackCount / totalCannyCount >= 0.99) {
                 circleStone = CircleF(Point2f(x, y), littleRadius);
                 //Console.Write("无圆但中心空洞   ");
+                LOGD("无圆但中心空洞 %d,%d", indexX + 1, indexY + 1);
             }
         } else {
             //Console.Write("有圆   ");
+            realCircle = true;
+            LOGD("有圆 %d,%d", indexX + 1, indexY + 1);
+
         }
 
         if (circleStone.Radius != 0) {
@@ -1022,18 +1040,19 @@ int FindStone(int index, uchar *cannyBytes, uchar *grayImageData) {
                 }
             }
             float averageGray = totalGray / totalCount;
-            if (averageGray > 0.45) {
+            if ((averageGray > 0.45 && realCircle) || averageGray > 0.60) {
                 /*Console.Write("  为白" + "  灰度" + averageGray.ToString("F2"));
                 Console.WriteLine("  (" + indexX + "," + indexY + ")");*/
                 return 2;//白
-            } else if (averageGray < 0.45) {
+            } else if ((averageGray < 0.45 && realCircle) || averageGray < 0.3) {
                 /*Console.Write("  为黑" + "  灰度" + averageGray.ToString("F2"));
                 Console.WriteLine("  (" + indexX + "," + indexY + ")");*/
                 return 1;//黑
-            } else {
-                //Console.WriteLine("错误");
-                return -1;//错误
             }
+//            else {
+//                //Console.WriteLine("错误");
+//                return -1;//错误
+//            }
         }
     }
 #pragma endregion
@@ -1056,6 +1075,8 @@ int FindStone(int index, uchar *cannyBytes, uchar *grayImageData) {
                 if (type == Center) {
                     //Console.Write("  找到十字");
                     //Console.WriteLine("  (" + indexX + "," + indexY + ")");
+                    LOGD("找到十字 %d,%d", indexX + 1, indexY + 1);
+
                     return 0;//空
                 }
             }
@@ -1080,19 +1101,20 @@ int FindStone(int index, uchar *cannyBytes, uchar *grayImageData) {
             }
         }
         float averageGray = totalGray / totalCount;
-        if (averageGray > 0.75)//白的灰度一般在0.6以上
+        if (averageGray > 0.8)//白的灰度一般在0.6以上
         {
-            //Console.Write("  强行灰度为白" + "  灰度" + averageGray.ToString("F2"));
-            //Console.WriteLine("  (" + indexX + "," + indexY + ")");
+            LOGD("  强行灰度为白  灰度 %.2f %d,%d", averageGray, indexX + 1, indexY + 1);
             return 2;//白
-        } else if (averageGray < 0.15)//黑的灰度一般在0.2以下
+        } else if (averageGray < 0.12)//黑的灰度一般在0.2以下
         {
             //Console.Write("  强行灰度为黑" + "  灰度" + averageGray.ToString("F2"));
             //Console.WriteLine("  (" + indexX + "," + indexY + ")");
+            LOGD("  强行灰度为黑  灰度 %.2f %d,%d", averageGray, indexX + 1, indexY + 1);
             return 1;//黑
         } else {
             //Console.Write("  强行灰度为空");
             //Console.WriteLine("  (" + indexX + 1 + "," + indexY + 1 + ")");
+//            LOGD("  强行灰度为白  灰度 %.2f %d,%d", indexX + 1, indexY + 1);
             return 0;//空
         }
     }
