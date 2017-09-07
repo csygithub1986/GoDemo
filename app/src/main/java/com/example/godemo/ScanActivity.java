@@ -56,8 +56,8 @@ public class ScanActivity extends AppCompatActivity implements SurfaceHolder.Cal
         hasSurface = false;
         inactivityTimer = new InactivityTimer(this);//这是什么
 
-        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.test);
-        GlobalEnvironment.ScanedBitmap=bitmap;
+//        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.test);
+//        GlobalEnvironment.ScanedBitmap=bitmap;
     }
 
     @Override

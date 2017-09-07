@@ -28,43 +28,43 @@ Mat GrayBlurImage;
 Point *AllCoordinate;
 
 bool Detect(Mat img, int w, int h, int channel, int boardSize, int result[]) {
-    uchar *psrc = (uchar *) img.data;
-    vector<int> temp;
-    int leng = img.total();
-    for (int i = 0; i < leng; ++i) {
-        temp.push_back((int) psrc[i]);
-    }
+
+    BoardSize = boardSize;
+    ImageWidth = w;
+    ImageHeight = h;
+    MaxGridWidth = (ImageWidth + ImageHeight) / 2 / (BoardSize - 1);
+    MinGridWidth = (int) (MaxGridWidth * MinWidthRate);
+    CrossDetectLen = MinGridWidth / 4;
+
+//    LOGD("c++检测,ImageWidth: %d",ImageWidth);
+//    LOGD("c++检测,ImageHeight: %d",ImageHeight);
+    LOGD("c++检测,MaxGridWidth: %d", MaxGridWidth);
+    LOGD("c++检测,MinGridWidth: %d",MinGridWidth);
+//    LOGD("c++检测,CrossDetectLen: %d",CrossDetectLen);
 
     //初始化，灰度、降噪
     GrayBlurImage = InitImage(img);
-
-    uchar *psrc2 = (uchar *) GrayBlurImage.data;
-    vector<int> temp2;
-    int leng2 = GrayBlurImage.total();
-    for (int i = 0; i < leng2; ++i) {
-        temp2.push_back((int) psrc2[i]);
-    }
 
     //1、找交点
     //第三、四个参数分别为边缘检测阈值和连接阈值（大于第一个作为边界，小于第二个舍弃，介于之间时看该点是否连接着其他边界点）
     cv::Canny(GrayBlurImage, CannyEdges, CannyThreshold, CannyThreshold2);
 
-    uchar *psrc3 = (uchar *) CannyEdges.data;
-    vector<int> temp3;
-    int leng3 = CannyEdges.total();
-    for (int i = 0; i < leng3; ++i) {
-        temp3.push_back((int) psrc3[i]);
-    }
-
-    int lll = 0;
-    for (int i = 0; i < temp3.size(); ++i) {
-        if (temp3[i] != 0)
-            lll++;
-    }
-    LOGD("canny个数： %d" , lll);
+//    uchar *psrc3 = (uchar *) CannyEdges.data;
+//    vector<int> temp3;
+//    int leng3 = CannyEdges.total();
+//    for (int i = 0; i < leng3; ++i) {
+//        temp3.push_back((int) psrc3[i]);
+//    }
+//
+//    int lll = 0;
+//    for (int i = 0; i < temp3.size(); ++i) {
+//        if (temp3[i] != 0)
+//            lll++;
+//    }
+//    LOGD("canny个数： %d", lll);
 
     CrossPoints = DetectCross(CannyEdges.data, w, h);
-    LOGD("图形解析，交叉点个数： %d", CrossPoints.size());
+//    LOGD("图形解析，交叉点个数： %d", CrossPoints.size());
 
     //2、找角
     Point2f directionLeft = Point2f();
@@ -73,11 +73,45 @@ bool Detect(Mat img, int w, int h, int channel, int boardSize, int result[]) {
     Point2f directionDown = Point2f();
     Conors = FindConor(&directionLeft, &directionRight, &directionUp, &directionDown);
 
+    //斜率必须满足条件
+    if (directionLeft.y == 0 || directionRight.y == 0 || directionUp.x == 0 || directionDown.x == 0) {
+        LOGD("斜率除数为0");
+        return false;
+    }
+    if (abs(directionLeft.x / directionLeft.y) > 0.08f ||
+        abs(directionRight.x / directionRight.y) > 0.08f ||
+        abs(directionUp.y / directionUp.x) > 0.08f ||
+        abs(directionDown.y / directionDown.x) > 0.08f) {
+        LOGD("斜率不满足");
+        return false;
+    }
 
     //如果找角没找到，返回false
     if (Conors == nullptr) {
+        LOGD("没找到角");
         return false;
     }
+    int small = MinGridWidth/2;
+    int big = MaxGridWidth * 3;
+    int bigMinX = ImageWidth - big;
+    int bigMaxX = ImageWidth - small;
+    int bigMinY = ImageHeight - big;
+    int bigMaxY = ImageHeight - small;
+
+
+    if (Conors[0].x < small || Conors[0].x > big || Conors[0].y < small || Conors[0].y > big ||
+        Conors[1].x < bigMinX || Conors[1].x > bigMaxX || Conors[1].y < small || Conors[1].y > big ||
+        Conors[2].x < bigMinX || Conors[2].x > bigMaxX || Conors[2].y > bigMaxY || Conors[2].y < bigMinY ||
+        Conors[3].x < small || Conors[3].x > big || Conors[3].y > bigMaxY || Conors[3].y < bigMinY) {
+        LOGD("角超出范围");
+        return false;
+    }
+
+
+//    LOGD("找到角directionLeft： %d  %d", (int) Conors[0].x, (int) Conors[0].y);
+//    LOGD("找到角directionRight： %d  %d", (int) Conors[1].x, (int) Conors[1].y);
+//    LOGD("找到角directionUp： %d  %d", (int) Conors[2].x, (int) Conors[2].y);
+//    LOGD("找到角directionDown： %d  %d", (int) Conors[3].x, (int) Conors[3].y);
 
     //3、透视修正，计算网格
     LineSegment2DF *horizontalLines = new LineSegment2DF[BoardSize];
@@ -104,12 +138,7 @@ bool Detect(Mat img, int w, int h, int channel, int boardSize, int result[]) {
 
 
 bool Detect(unsigned char *src, int w, int h, int channel, int boardSize, int result[]) {
-    BoardSize = boardSize;
-    ImageWidth = w;
-    ImageHeight = h;
-    MaxGridWidth = (ImageWidth + ImageHeight) / 2 / (BoardSize - 1);
-    MinGridWidth = (int) (MaxGridWidth * MinWidthRate);
-    CrossDetectLen = MinGridWidth / 4;
+
 
     int format;
     switch (channel) {
@@ -233,11 +262,17 @@ IsLineOnDirection(int width, uchar imageBytes[], int x, int y, int directionX, i
     int whiteCount = 0;
 
     for (size_t i = 0; i < 5 * CrossDetectLen; i++) {
+//        LOGD("whiteCount：%d",whiteBytes[i]);
+
         if (whiteBytes[i] == (uchar) 255) {
             whiteCount++;
         }
     }
-    return whiteCount > whiteBytes.size() * CrossFillRate;
+    bool isline = whiteCount > whiteBytes.size() * CrossFillRate;
+    if (isline) {
+//        LOGD("C++调试：isline");
+    }
+    return isline;
     //}
     //catch (Exception ex)
     //{
@@ -444,7 +479,7 @@ TypePointMap DetectCross(uchar *imageBytes, int width, int height) {
             }
         }
     }
-    LOGD("上交叉点个数： %d", crossDic.size());
+//    LOGD("上交叉点个数： %d", crossDic.size());
 
     //下
     edge = height - scanRowCount - CrossDetectLen;
@@ -470,7 +505,7 @@ TypePointMap DetectCross(uchar *imageBytes, int width, int height) {
             }
         }
     }
-    LOGD("下交叉点个数： %d", crossDic.size());
+//    LOGD("下交叉点个数： %d", crossDic.size());
 
 
     //左
@@ -496,7 +531,7 @@ TypePointMap DetectCross(uchar *imageBytes, int width, int height) {
             }
         }
     }
-    LOGD("左交叉点个数： %d", crossDic.size());
+//    LOGD("左交叉点个数： %d", crossDic.size());
 
     //右
     edge = width - scanColCount - CrossDetectLen;
@@ -521,7 +556,7 @@ TypePointMap DetectCross(uchar *imageBytes, int width, int height) {
             }
         }
     }
-    LOGD("右交叉点个数： %d", crossDic.size());
+//    LOGD("右交叉点个数： %d", crossDic.size());
 
     return crossDic;
     //}
@@ -749,14 +784,11 @@ void GetEvenDevideLines(Point2f *conors, Point2f directionLeft, Point2f directio
         //从上面画线时，都从1画到n/2-1，从下面画线时，从n-2画到n/2。当奇偶不同时，从下划线条数不同，但代码一致。
         for (int i = 0; i < BoardSize / 2 - 1; i++) {
             //从左上和右上开始，往对边画对角线，然后求平行的第1、2...n/2-1条线
-            LineSegment2DF diagonalLineUp1 = LineSegment2DF(leftPoints[i],
-                                                            downPoints[BoardSize - i]);
+            LineSegment2DF diagonalLineUp1 = LineSegment2DF(leftPoints[i], downPoints[BoardSize - i - 1]);
             LineSegment2DF diagonalLineUp2 = LineSegment2DF(rightPoints[i], downPoints[i]);
             //和第1,n-2条垂直线交点
-            Point2f pLeft = FindLineCross(diagonalLineUp1.Direction, diagonalLineUp1.P1,
-                                          verticalLines[1].Direction, verticalLines[1].P1);
-            Point2f pRight = FindLineCross(diagonalLineUp2.Direction, diagonalLineUp2.P1,
-                                           verticalLines[BoardSize - 2].Direction,
+            Point2f pLeft = FindLineCross(diagonalLineUp1.Direction, diagonalLineUp1.P1, verticalLines[1].Direction, verticalLines[1].P1);
+            Point2f pRight = FindLineCross(diagonalLineUp2.Direction, diagonalLineUp2.P1, verticalLines[BoardSize - 2].Direction,
                                            verticalLines[BoardSize - 2].P1);
             horizontalLines[i + 1] = LineSegment2DF(pLeft, pRight);
             leftPoints[i + 1] = FindLineCross(horizontalLines[i + 1].Direction, pLeft,
@@ -768,20 +800,13 @@ void GetEvenDevideLines(Point2f *conors, Point2f directionLeft, Point2f directio
         for (int i = BoardSize - 1; i > BoardSize / 2; i--) {
             //从左下和右下开始，往对边画对角线，然后求平行的第n-2、n-3..n/2条线
             LineSegment2DF diagonalLineDown1 = LineSegment2DF(leftPoints[i], upPoints[i]);
-            LineSegment2DF diagonalLineDown2 = LineSegment2DF(rightPoints[i],
-                                                              upPoints[BoardSize - 1 - i]);
+            LineSegment2DF diagonalLineDown2 = LineSegment2DF(rightPoints[i], upPoints[BoardSize - 1 - i]);
             //和第1,n-2条垂直线交点
-            Point2f pLeft = FindLineCross(diagonalLineDown1.Direction, diagonalLineDown1.P1,
-                                          verticalLines[1].Direction, verticalLines[1].P1);
-            Point2f pRight = FindLineCross(diagonalLineDown2.Direction, diagonalLineDown2.P1,
-                                           verticalLines[BoardSize - 2].Direction,
-                                           verticalLines[BoardSize - 2].P1);
+            Point2f pLeft = FindLineCross(diagonalLineDown1.Direction, diagonalLineDown1.P1, verticalLines[1].Direction, verticalLines[1].P1);
+            Point2f pRight = FindLineCross(diagonalLineDown2.Direction, diagonalLineDown2.P1, verticalLines[BoardSize - 2].Direction, verticalLines[BoardSize - 2].P1);
             horizontalLines[i - 1] = LineSegment2DF(pLeft, pRight);
-            leftPoints[i - 1] = FindLineCross(horizontalLines[i - 1].Direction, pLeft,
-                                              verticalLines[0].Direction, verticalLines[0].P1);
-            rightPoints[i - 1] = FindLineCross(horizontalLines[i - 1].Direction, pRight,
-                                               verticalLines[BoardSize - 1].Direction,
-                                               verticalLines[BoardSize - 1].P1);
+            leftPoints[i - 1] = FindLineCross(horizontalLines[i - 1].Direction, pLeft, verticalLines[0].Direction, verticalLines[0].P1);
+            rightPoints[i - 1] = FindLineCross(horizontalLines[i - 1].Direction, pRight, verticalLines[BoardSize - 1].Direction, verticalLines[BoardSize - 1].P1);
         }
     }
     if (verticalParallel && !horizontalParallel) {

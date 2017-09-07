@@ -132,7 +132,7 @@ final class DecodeHandler extends Handler {
         Bitmap bitmap = source.renderCroppedGreyscaleBitmap();
 
         long end = System.currentTimeMillis();
-        Log.d(TAG, "Found barcode (" + (end - start) + " ms):\n");
+        Log.d(TAG, "生成bitmap  (" + (end - start) + " ms):\n");
         //endregion
 
 

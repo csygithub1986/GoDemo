@@ -127,21 +127,33 @@ public final class CaptureActivityHandler extends Handler {
 
 
                 //解析图片，如果失败，不采纳
-//                GlobalEnvironment.ScanedBitmap = img;
+                GlobalEnvironment.ScanedBitmap = img;
+                long start = System.currentTimeMillis();
 
                 int[] result = Detector.Detect(GlobalEnvironment.ScanedBitmap, GlobalEnvironment.ScanedBitmap.getWidth(), GlobalEnvironment.ScanedBitmap.getHeight(), 19);
+                long end = System.currentTimeMillis();
+                Log.d(TAG, "c++ Detect图像  (" + (end - start) + " ms):\n");
                 if (result == null) {
                     state = State.PREVIEW;
                     CameraManager.get().requestPreviewFrame(decodeThread.getHandler(), R.id.decode);
-                    Log.d("detect", "不采纳");
-                    try {
-                        Thread.sleep(500);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+//                    Log.d("detect", "不采纳");
+//                    try {
+//                        Thread.sleep(3500);
+//                    } catch (InterruptedException e) {
+//                        e.printStackTrace();
+//                    }
                     return;
 //                restartPreviewAndDecode();
                 }
+
+                for (int i = 0; i < result.length; i++) {
+                    if (result[i] > 0) {
+                        int x = i % 19 + 1;
+                        int y = i / 19 + 1;
+                        Log.d(TAG, "stone：" + x + "," + y + ":" + result[i]);
+                    }
+                }
+
 
                 activity.handleGoDetect((Result) message.obj, img);
                 break;
