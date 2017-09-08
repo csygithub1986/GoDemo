@@ -62,7 +62,7 @@ final class CameraConfigurationManager {
         screenResolution = new Point(display.getWidth(), display.getHeight());
         Log.d(TAG, "Screen resolution: " + screenResolution);
         cameraResolution = getCameraResolution(parameters, screenResolution);
-        Log.d(TAG, "Camera resolution: " + screenResolution);
+        Log.d(TAG, "Camera resolution: " + cameraResolution);
     }
 
     /**
@@ -77,7 +77,7 @@ final class CameraConfigurationManager {
         //设置摄像机预览大小 csy注释
         parameters.setPreviewSize(cameraResolution.x, cameraResolution.y);
         parameters.setPictureSize(cameraResolution.x, cameraResolution.y);
-        parameters.setPictureFormat(ImageFormat.JPEG);
+//        parameters.setPictureFormat(ImageFormat.JPEG);
 //        parameters.set("jpeg-quality", 85);
         setFlash(parameters);
         setZoom(parameters);
@@ -192,7 +192,8 @@ final class CameraConfigurationManager {
         }
 
         if (bestX > 0 && bestY > 0) {
-            return new Point(bestX, bestY);
+//            return new Point(bestX, bestY);
+            return new Point(1920, 1080);//调试
         }
         return null;
     }

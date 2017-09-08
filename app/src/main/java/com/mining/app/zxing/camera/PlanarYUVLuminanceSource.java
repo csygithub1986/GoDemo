@@ -28,7 +28,7 @@ import android.graphics.Bitmap;
  * It works for any pixel format where the Y channel is planar and appears first, including
  * YCbCr_420_SP and YCbCr_422_SP.
  *
- * @author dswitkin@google.com (Daniel Switkin)
+ * 目前支持NV21和YV12（csy）
  */
 public final class PlanarYUVLuminanceSource extends LuminanceSource {
   private final byte[] yuvData;
