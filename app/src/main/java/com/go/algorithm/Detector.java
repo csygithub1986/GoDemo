@@ -11,4 +11,13 @@ public class Detector {
 
     public static native int[] Detect(Object bitmap,int width,int height,int boardSize);
 
+    public static native void GetCut(Object bitmap);
+
+    public static native void GetOrigin(Object bitmap);
+
+    public static native void GetGrid(Object bitmap);
+
+    public static native void GetCircle(Object bitmap);
+
+
 }

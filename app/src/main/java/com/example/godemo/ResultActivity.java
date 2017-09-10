@@ -58,6 +58,7 @@ import android.widget.RelativeLayout;
 import android.widget.TabHost;
 import android.widget.TextView;
 
+import com.go.algorithm.Detector;
 import com.ui.algorithm.CalculateResult;
 import com.ui.algorithm.SgfReader;
 import com.ui.model.Board;
@@ -98,6 +99,9 @@ public class ResultActivity extends Activity implements OnTouchListener, OnClick
 
         tabHost = (TabHost) findViewById(R.id.tabHost);
         tabHost.setup();
+
+        tabHost.addTab(tabHost.newTabSpec("boardGrid").setIndicator("四边").setContent(R.id.boardGrid));
+        tabHost.addTab(tabHost.newTabSpec("boardCircles").setIndicator("圆圈").setContent(R.id.boardCircles));
         tabHost.addTab(tabHost.newTabSpec("boardUI").setIndicator("解析图").setContent(R.id.boardUI));
         tabHost.addTab(tabHost.newTabSpec("boardBitmap").setIndicator("扫描图").setContent(R.id.boardBitmap));
 
@@ -131,6 +135,18 @@ public class ResultActivity extends Activity implements OnTouchListener, OnClick
 
         ImageView imageBoard = (ImageView) findViewById(R.id.imageView);
         imageBoard.setImageBitmap(GlobalEnvironment.ScanedBitmap);
+
+        //四边debug
+        Bitmap gridBitmap=Bitmap.createBitmap(GlobalEnvironment.ScanedBitmap.getWidth(),GlobalEnvironment.ScanedBitmap.getHeight(),Config.ARGB_8888);
+        Detector.GetGrid(gridBitmap);
+        ImageView imageViewGrid = (ImageView) findViewById(R.id.imageViewGrid);
+        imageViewGrid.setImageBitmap(gridBitmap);
+
+        //圆圈debug
+        Bitmap circleBitmap=Bitmap.createBitmap(GlobalEnvironment.ScanedBitmap.getWidth(),GlobalEnvironment.ScanedBitmap.getHeight(),Config.ARGB_8888);
+        Detector.GetCircle(circleBitmap);
+        ImageView imageViewCircles = (ImageView) findViewById(R.id.imageViewCircles);
+        imageViewCircles.setImageBitmap(circleBitmap);
     }
 
     private void InitBoard(int[] data) {

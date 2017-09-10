@@ -26,6 +26,8 @@ Point2f *Conors;
 Mat CannyEdges;
 Mat GrayBlurImage;
 Point *AllCoordinate;
+LineSegment2DF *horizontalLines;
+LineSegment2DF *verticalLines;
 
 bool Detect(Mat img, int w, int h, int channel, int boardSize, int result[]) {
 
@@ -118,8 +120,8 @@ bool Detect(Mat img, int w, int h, int channel, int boardSize, int result[]) {
 //    LOGD("找到角directionDown： %d  %d", (int) Conors[3].x, (int) Conors[3].y);
 
     //3、透视修正，计算网格
-    LineSegment2DF *horizontalLines = new LineSegment2DF[BoardSize];
-    LineSegment2DF *verticalLines = new LineSegment2DF[BoardSize];
+    horizontalLines = new LineSegment2DF[BoardSize];
+    verticalLines = new LineSegment2DF[BoardSize];
     GetEvenDevideLines(Conors, directionLeft, directionRight, directionUp, directionDown,
                        horizontalLines, verticalLines);
     AllCoordinate = GetGridCoordinate(horizontalLines, verticalLines);
@@ -1084,7 +1086,7 @@ int FindStone(int index, uchar *cannyBytes, uchar *grayImageData) {
     }
 #pragma endregion
 
-#pragma endregion 如果既无圆也无十字，最后对0.4倍最小格宽为半径的圆求灰度，如果灰度<0.2或者>0.75（数值待定），之间则为空
+#pragma region 如果既无圆也无十字，最后对0.4倍最小格宽为半径的圆求灰度，如果灰度<0.2或者>0.75（数值待定），之间则为空
     {
         float totalGray = 0;
         int totalCount = 0;
@@ -1128,4 +1130,34 @@ void GetCoordinate(int x[], int y[]) {
         y[i] = AllCoordinate[i].y;
     }
 }
+
+//region description
+//手机截屏
+void GetCut(Mat bitmap) {
+
+}
+
+//彩色原图
+void GetOrigin(Mat bitmap) {
+}
+
+//黑白图+网格，传入空白图，将画好的图复制到里面
+void GetGrid(Mat *bitmap) {
+    GrayBlurImage.copyTo(*bitmap);
+    line(*bitmap, Conors[0], Conors[1], Scalar(0, 255, 0), 1);
+}
+
+//黑白图+圆
+void GetCircle(Mat *bitmap) {
+    GrayBlurImage.copyTo(*bitmap);
+    for (int i = 0; i < Circles.size(); ++i) {
+        circle(*bitmap, Circles[i].Center, MinGridWidth / 2, Scalar(0, 255, 0), 1);
+    }
+}
+
+//黑白图+圆
+void GetCircle2(void *pixel) {
+    pixel = &GrayBlurImage;
+}
+//endregion
 

@@ -60,10 +60,8 @@ struct LineSegment2DF {
     LineSegment2DF(Point2f p1, Point2f p2) {
         P1 = p1;
         P2 = p2;
-        Direction.x =
-                (p2.x - p1.x) / sqrt((p2.x - p1.x) * (p2.x - p1.x) + (p2.y - p1.y) * (p2.y - p1.y));
-        Direction.y =
-                (p2.y - p1.y) / sqrt((p2.x - p1.x) * (p2.x - p1.x) + (p2.y - p1.y) * (p2.y - p1.y));
+        Direction.x = (p2.x - p1.x) / sqrt((p2.x - p1.x) * (p2.x - p1.x) + (p2.y - p1.y) * (p2.y - p1.y));
+        Direction.y = (p2.y - p1.y) / sqrt((p2.x - p1.x) * (p2.x - p1.x) + (p2.y - p1.y) * (p2.y - p1.y));
     }
 };
 
@@ -92,19 +90,29 @@ map<CrossType, list<Point> > DetectCross(uchar *imageBytes, int width, int heigh
 
 void LineFit(vector<Point2f> points, Point2f *direction, Point2f *pointOnLine);
 
-Point2f
-FindLineCross(Point2f direction1, Point2f pointOnLine1, Point2f direction2, Point2f pointOnLine2);
+Point2f FindLineCross(Point2f direction1, Point2f pointOnLine1, Point2f direction2, Point2f pointOnLine2);
 
 Point *GetGridCoordinate(LineSegment2DF *horizontalLines, LineSegment2DF *verticalLines);
 
-void GetEvenDevideLines(Point2f *conors, Point2f directionLeft, Point2f directionRight,
-                        Point2f directionUp, Point2f directionDown, LineSegment2DF *horizontalLines,
-                        LineSegment2DF *verticalLines);
+void GetEvenDevideLines(Point2f *conors, Point2f directionLeft, Point2f directionRight, Point2f directionUp, Point2f directionDown, LineSegment2DF *horizontalLines, LineSegment2DF *verticalLines);
 
-Point2f *FindConor(Point2f *directionLeft, Point2f *directionRight, Point2f *directionUp,
-                   Point2f *directionDown);
+Point2f *FindConor(Point2f *directionLeft, Point2f *directionRight, Point2f *directionUp, Point2f *directionDown);
 
 int FindStone(int index, uchar *cannyBytes, uchar *grayImageData);
+
+
+//测试用。如果是C#，这里面的实现会不一样
+void GetCut(Mat bitmap);//手机截屏
+
+void GetOrigin(Mat bitmap);//彩色原图
+
+void GetGrid(Mat *bitmap);//黑白图+网格
+
+void GetCircle(Mat *bitmap);//黑白图+圆
+void GetCircle2(void *pixel);//黑白图+圆
+
+
+
 
 
 
