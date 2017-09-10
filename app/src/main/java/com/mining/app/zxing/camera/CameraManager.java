@@ -39,10 +39,10 @@ public final class CameraManager {
 
     private static final String TAG = CameraManager.class.getSimpleName();
 
-    private static final int MIN_FRAME_WIDTH = 640;
-    private static final int MIN_FRAME_HEIGHT = 640;
-    private static final int MAX_FRAME_WIDTH = 640;
-    private static final int MAX_FRAME_HEIGHT = 640;
+    private static final int MIN_FRAME_WIDTH = 720;
+    private static final int MIN_FRAME_HEIGHT = 720;
+    private static final int MAX_FRAME_WIDTH = 720;
+    private static final int MAX_FRAME_HEIGHT = 720;
 
     private static CameraManager cameraManager;
 
@@ -229,6 +229,7 @@ public final class CameraManager {
     }
 
     /**
+     * 获取扫描框在屏幕中的位置和大小
      * Calculates the framing rect which the UI should draw to show the user where to place the
      * barcode. This target helps with alignment as well as forces the user to hold the device
      * far enough away to ensure the image will be in focus.
@@ -241,18 +242,24 @@ public final class CameraManager {
             if (camera == null) {
                 return null;
             }
-            int width = screenResolution.x * 3 / 4;
-            if (width < MIN_FRAME_WIDTH) {
-                width = MIN_FRAME_WIDTH;
-            } else if (width > MAX_FRAME_WIDTH) {
-                width = MAX_FRAME_WIDTH;
-            }
-            int height = screenResolution.y * 3 / 4;
-            if (height < MIN_FRAME_HEIGHT) {
-                height = MIN_FRAME_HEIGHT;
-            } else if (height > MAX_FRAME_HEIGHT) {
-                height = MAX_FRAME_HEIGHT;
-            }
+//            int width = screenResolution.x * 3 / 4;
+//            if (width < MIN_FRAME_WIDTH) {
+//                width = MIN_FRAME_WIDTH;
+//            } else if (width > MAX_FRAME_WIDTH) {
+//                width = MAX_FRAME_WIDTH;
+//            }
+//            int height = screenResolution.y * 3 / 4;
+//            if (height < MIN_FRAME_HEIGHT) {
+//                height = MIN_FRAME_HEIGHT;
+//            } else if (height > MAX_FRAME_HEIGHT) {
+//                height = MAX_FRAME_HEIGHT;
+//            }
+
+            //让扫描屏全屏正方形
+            int min = screenResolution.x > screenResolution.y ? screenResolution.y : screenResolution.x;
+            int width = min;
+            int height = min;
+
             int leftOffset = (screenResolution.x - width) / 2;
             int topOffset = (screenResolution.y - height) / 2;
             framingRect = new Rect(leftOffset, topOffset, leftOffset + width, topOffset + height);
@@ -262,8 +269,8 @@ public final class CameraManager {
     }
 
     /**
-     * Like {@link #getFramingRect} but coordinates are in terms of the preview frame,
-     * not UI / screen.
+     * 获取扫描框中扫描的图像，相对于真实图像的大小。等于扫描框 / 屏幕 * 真实图像
+     * Like {@link #getFramingRect} but coordinates are in terms of the preview frame, not UI / screen.
      */
     public Rect getFramingRectInPreview() {
         if (framingRectInPreview == null) {
@@ -319,28 +326,21 @@ public final class CameraManager {
         int previewFormat = configManager.getPreviewFormat();
         String previewFormatString = configManager.getPreviewFormatString();
         switch (previewFormat) {
-            // This is the standard Android format which all devices are REQUIRED to support.
-            // In theory, it's the only one we should ever care about.
-            case PixelFormat.YCbCr_420_SP:
-                // This format has never been seen in the wild, but is compatible as we only care
-                // about the Y channel, so allow it.
-            case PixelFormat.YCbCr_422_SP:
-                return new PlanarYUVLuminanceSource(data, width, height, rect.left, rect.top,
-                        rect.width(), rect.height());
+            // This is the standard Android format which all devices are REQUIRED to support. In theory, it's the only one we should ever care about.
+            case ImageFormat.NV21:
+                // This format has never been seen in the wild, but is compatible as we only care about the Y channel, so allow it.
+            case ImageFormat.NV16:
+                return new PlanarYUVLuminanceSource(data, width, height, rect.left, rect.top, rect.width(), rect.height());
             default:
-                // The Samsung Moment incorrectly uses this variant instead of the 'sp' version.
-                // Fortunately, it too has all the Y data up front, so we can read it.
+                // The Samsung Moment incorrectly uses this variant instead of the 'sp' version.Fortunately, it too has all the Y data up front, so we can read it.
                 if ("yuv420p".equals(previewFormatString)) {
-                    return new PlanarYUVLuminanceSource(data, width, height, rect.left, rect.top,
-                            rect.width(), rect.height());
+                    return new PlanarYUVLuminanceSource(data, width, height, rect.left, rect.top, rect.width(), rect.height());
                 }
         }
-        throw new IllegalArgumentException("Unsupported picture format: " +
-                previewFormat + '/' + previewFormatString);
+        throw new IllegalArgumentException("Unsupported picture format: " + previewFormat + '/' + previewFormatString);
     }
 
     public Context getContext() {
         return context;
     }
-
 }

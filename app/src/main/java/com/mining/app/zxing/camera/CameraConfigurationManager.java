@@ -43,7 +43,7 @@ final class CameraConfigurationManager {
     private Point screenResolution;
     private Point cameraResolution;
     private int previewFormat;
-    private String previewFormatString;
+    private String previewFormatString;//允许的预览图像格式
 
     CameraConfigurationManager(Context context) {
         this.context = context;

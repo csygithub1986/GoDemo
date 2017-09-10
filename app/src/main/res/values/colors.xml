@@ -4,7 +4,7 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
 
-    <color name="result_view">#b0000000</color>
-    <color name="viewfinder_mask">#60000000</color>
+    <color name="result_view">#E0000000</color>
+    <color name="viewfinder_mask">#D0000000</color>
     <color name="possible_result_points">#c0ffff00</color>
 </resources>

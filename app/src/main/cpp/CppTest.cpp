@@ -995,25 +995,25 @@ int FindStone(int index, uchar *cannyBytes, uchar *grayImageData) {
 
         bool realCircle = false;
         if (circleStone.Radius == 0) {
-            //或者以0.25倍最小格宽为半径的圆，百分之99（数值待定）都是黑色，判定为有圆
-            int totalCannyCount = 0;
-            int blackCount = 0;
-            float littleRadius = 0.25f * MinGridWidth;
-            for (int i = (int) (-littleRadius) + 1; i < littleRadius; i++) {
-                for (int j = (int) (-littleRadius) + 1; j < littleRadius; j++) {
-                    if (i * i + j * j < littleRadius * littleRadius) {
-                        if (x + i >= 0 && x + i < ImageWidth && y + j >= 0 && y + j < ImageHeight) {
-                            totalCannyCount++;
-                            blackCount += cannyBytes[x + i + (y + j) * ImageWidth] == 0 ? 1 : 0;
-                        }
-                    }
-                }
-            }
-            if ((float) blackCount / totalCannyCount >= 0.99) {
-                circleStone = CircleF(Point2f(x, y), littleRadius);
-                //Console.Write("无圆但中心空洞   ");
-                LOGD("无圆但中心空洞 %d,%d", indexX + 1, indexY + 1);
-            }
+//            //或者以0.25倍最小格宽为半径的圆，百分之99（数值待定）都是黑色，判定为有圆
+//            int totalCannyCount = 0;
+//            int blackCount = 0;
+//            float littleRadius = 0.25f * MinGridWidth;
+//            for (int i = (int) (-littleRadius) + 1; i < littleRadius; i++) {
+//                for (int j = (int) (-littleRadius) + 1; j < littleRadius; j++) {
+//                    if (i * i + j * j < littleRadius * littleRadius) {
+//                        if (x + i >= 0 && x + i < ImageWidth && y + j >= 0 && y + j < ImageHeight) {
+//                            totalCannyCount++;
+//                            blackCount += cannyBytes[x + i + (y + j) * ImageWidth] == 0 ? 1 : 0;
+//                        }
+//                    }
+//                }
+//            }
+//            if ((float) blackCount / totalCannyCount >= 0.99) {
+//                circleStone = CircleF(Point2f(x, y), littleRadius);
+//                //Console.Write("无圆但中心空洞   ");
+//                LOGD("无圆但中心空洞 %d,%d", indexX + 1, indexY + 1);
+//            }
         } else {
             //Console.Write("有圆   ");
             realCircle = true;
