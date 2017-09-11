@@ -102,14 +102,13 @@ int FindStone(int index, uchar *cannyBytes, uchar *grayImageData);
 
 
 //测试用。如果是C#，这里面的实现会不一样
-void GetCut(Mat bitmap);//手机截屏
+void GetCut(Mat*);//手机截屏
 
-void GetOrigin(Mat bitmap);//彩色原图
+void GetOrigin(Mat*);//彩色原图
 
-void GetGrid(Mat *bitmap);//黑白图+网格
+void GetGrid(Mat*);//黑白图+网格
 
-void GetCircle(Mat *bitmap);//黑白图+圆
-void GetCircle2(void *pixel);//黑白图+圆
+void GetCircle(Mat*);//黑白图+圆
 
 
 

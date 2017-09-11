@@ -1133,31 +1133,88 @@ void GetCoordinate(int x[], int y[]) {
 
 //region description
 //手机截屏
-void GetCut(Mat bitmap) {
+void GetCut(Mat *bitmap) {
 
 }
 
 //彩色原图
-void GetOrigin(Mat bitmap) {
+void GetOrigin(Mat *bitmap) {
 }
 
 //黑白图+网格，传入空白图，将画好的图复制到里面
 void GetGrid(Mat *bitmap) {
-    GrayBlurImage.copyTo(*bitmap);
-    line(*bitmap, Conors[0], Conors[1], Scalar(0, 255, 0), 1);
-}
+    Mat colored;
+    cvtColor(GrayBlurImage, colored, COLOR_GRAY2RGBA);
+    colored.copyTo(*bitmap);
+    line(*bitmap, Conors[0], Conors[1], Scalar(0, 200, 0), 2);
+    line(*bitmap, Conors[1], Conors[2], Scalar(0, 200, 0), 2);
+    line(*bitmap, Conors[2], Conors[3], Scalar(0, 200, 0), 2);
+    line(*bitmap, Conors[3], Conors[0], Scalar(0, 200, 0), 2);
 
-//黑白图+圆
-void GetCircle(Mat *bitmap) {
-    GrayBlurImage.copyTo(*bitmap);
-    for (int i = 0; i < Circles.size(); ++i) {
-        circle(*bitmap, Circles[i].Center, MinGridWidth / 2, Scalar(0, 255, 0), 1);
+
+    TypePointMap::iterator iterLeft = CrossPoints.find(Left);
+    if (iterLeft != CrossPoints.end()) {
+        for (list<Point>::iterator i = iterLeft->second.begin(); i != iterLeft->second.end(); ++i) {
+            circle(*bitmap, *i, 4, Scalar(0, 0, 200), 3);
+        }
+    }
+
+    TypePointMap::iterator iterLeft1 = CrossPoints.find(Right);
+    if (iterLeft1 != CrossPoints.end()) {
+        for (list<Point>::iterator i = iterLeft1->second.begin(); i != iterLeft1->second.end(); ++i) {
+            circle(*bitmap, *i, 4, Scalar(0, 0, 200), 3);
+        }
+    }
+
+    TypePointMap::iterator iterLeft2 = CrossPoints.find(Up);
+    if (iterLeft2 != CrossPoints.end()) {
+        for (list<Point>::iterator i = iterLeft2->second.begin(); i != iterLeft2->second.end(); ++i) {
+            circle(*bitmap, *i, 4, Scalar(200, 0, 0), 3);
+        }
+    }
+
+    TypePointMap::iterator iterLeft3 = CrossPoints.find(Down);
+    if (iterLeft3 != CrossPoints.end()) {
+        for (list<Point>::iterator i = iterLeft3->second.begin(); i != iterLeft3->second.end(); ++i) {
+            circle(*bitmap, *i, 4, Scalar(200, 0, 0), 3);
+        }
+    }
+
+    TypePointMap::iterator iterLeft4 = CrossPoints.find(LeftUp);
+    if (iterLeft4 != CrossPoints.end()) {
+        for (list<Point>::iterator i = iterLeft4->second.begin(); i != iterLeft4->second.end(); ++i) {
+            circle(*bitmap, *i, 6, Scalar(0, 150, 0), 4);
+        }
+    }
+    TypePointMap::iterator iterLeft7 = CrossPoints.find(LeftDown);
+    if (iterLeft7 != CrossPoints.end()) {
+        for (list<Point>::iterator i = iterLeft7->second.begin(); i != iterLeft7->second.end(); ++i) {
+            circle(*bitmap, *i, 6, Scalar(0, 150, 0), 4);
+        }
+    }
+    TypePointMap::iterator iterLeft5 = CrossPoints.find(RightUp);
+    if (iterLeft5 != CrossPoints.end()) {
+        for (list<Point>::iterator i = iterLeft5->second.begin(); i != iterLeft5->second.end(); ++i) {
+            circle(*bitmap, *i, 6, Scalar(0, 150, 0), 4);
+        }
+    }
+    TypePointMap::iterator iterLeft6 = CrossPoints.find(RightDown);
+    if (iterLeft6 != CrossPoints.end()) {
+        for (list<Point>::iterator i = iterLeft6->second.begin(); i != iterLeft6->second.end(); ++i) {
+            circle(*bitmap, *i, 6, Scalar(0, 150, 0), 4);
+        }
     }
 }
 
 //黑白图+圆
-void GetCircle2(void *pixel) {
-    pixel = &GrayBlurImage;
+void GetCircle(Mat *bitmap) {
+    Mat colored;
+    cvtColor(GrayBlurImage, colored, COLOR_GRAY2RGBA);
+    colored.copyTo(*bitmap);
+    for (int i = 0; i < Circles.size(); ++i) {
+        circle(*bitmap, Circles[i].Center, MinGridWidth / 2, Scalar(0, 200, 0), 2);
+    }
 }
+
 //endregion
 

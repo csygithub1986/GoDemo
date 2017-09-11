@@ -96,12 +96,12 @@ JNIEXPORT void JNICALL Java_com_go_algorithm_Detector_GetCircle //黑白图+圆
     CV_Assert(AndroidBitmap_lockPixels(env, bitmap, &pixels) >= 0);
     CV_Assert(pixels);
 
-//    Mat img;
-//    if (info.format == ANDROID_BITMAP_FORMAT_RGBA_8888) {
-//        img = Mat(info.height, info.width, CV_8UC4, pixels);
-//    } else {
-//        img = Mat(info.height, info.width, CV_8UC2, pixels);
-//    }
-    GetCircle2(pixels);
+    Mat img;
+    if (info.format == ANDROID_BITMAP_FORMAT_RGBA_8888) {
+        img = Mat(info.height, info.width, CV_8UC4, pixels);
+    } else {
+        img = Mat(info.height, info.width, CV_8UC2, pixels);
+    }
+    GetCircle(&img);
     AndroidBitmap_unlockPixels(env, bitmap);
 }
