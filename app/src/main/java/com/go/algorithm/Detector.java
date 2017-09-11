@@ -19,5 +19,7 @@ public class Detector {
 
     public static native void GetCircle(Object bitmap);
 
+    public static native void GetCanny(Object bitmap);
+
 
 }

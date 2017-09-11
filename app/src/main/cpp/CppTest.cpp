@@ -1216,5 +1216,12 @@ void GetCircle(Mat *bitmap) {
     }
 }
 
+//canny
+void GetCanny(Mat *bitmap) {
+    Mat colored;
+    cvtColor(CannyEdges, colored, COLOR_GRAY2BGR565);
+    colored.copyTo(*bitmap);
+}
+
 //endregion
 

@@ -102,8 +102,9 @@ public class ResultActivity extends Activity implements OnTouchListener, OnClick
 
         tabHost.addTab(tabHost.newTabSpec("boardGrid").setIndicator("四边").setContent(R.id.boardGrid));
         tabHost.addTab(tabHost.newTabSpec("boardCircles").setIndicator("圆圈").setContent(R.id.boardCircles));
+        tabHost.addTab(tabHost.newTabSpec("imageViewCanny").setIndicator("canny").setContent(R.id.imageViewCanny));
         tabHost.addTab(tabHost.newTabSpec("boardUI").setIndicator("解析图").setContent(R.id.boardUI));
-        tabHost.addTab(tabHost.newTabSpec("boardBitmap").setIndicator("扫描图").setContent(R.id.boardBitmap));
+//        tabHost.addTab(tabHost.newTabSpec("boardBitmap").setIndicator("扫描图").setContent(R.id.boardBitmap));
 
         jpnLayout = (LinearLayout) findViewById(R.id.jpnLayout);
         boardLayout = (RelativeLayout) findViewById(R.id.boardLayout);
@@ -133,8 +134,9 @@ public class ResultActivity extends Activity implements OnTouchListener, OnClick
 
         InitBoard(GlobalEnvironment.Data);
 
-        ImageView imageBoard = (ImageView) findViewById(R.id.imageView);
-        imageBoard.setImageBitmap(GlobalEnvironment.ScanedBitmap);
+        //扫描黑白图
+//        ImageView imageBoard = (ImageView) findViewById(R.id.imageView);
+//        imageBoard.setImageBitmap(GlobalEnvironment.ScanedBitmap);
 
         //四边debug
         Bitmap gridBitmap=Bitmap.createBitmap(GlobalEnvironment.ScanedBitmap.getWidth(),GlobalEnvironment.ScanedBitmap.getHeight(),Config.ARGB_8888);
@@ -147,6 +149,12 @@ public class ResultActivity extends Activity implements OnTouchListener, OnClick
         Detector.GetCircle(circleBitmap);
         ImageView imageViewCircles = (ImageView) findViewById(R.id.imageViewCircles);
         imageViewCircles.setImageBitmap(circleBitmap);
+
+        //canny
+        Bitmap cannyBitmap=Bitmap.createBitmap(GlobalEnvironment.ScanedBitmap.getWidth(),GlobalEnvironment.ScanedBitmap.getHeight(),Config.RGB_565);
+        Detector.GetCanny(cannyBitmap);
+        ImageView imageViewCanny = (ImageView) findViewById(R.id.imageViewCanny);
+        imageViewCanny.setImageBitmap(cannyBitmap);
     }
 
     private void InitBoard(int[] data) {

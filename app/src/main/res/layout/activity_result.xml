@@ -69,6 +69,26 @@
                         app:layout_constraintTop_toTopOf="parent" />
                 </LinearLayout>
 
+                <!--canny-->
+                <LinearLayout
+                    android:id="@+id/boardCanny"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <com.extensions.PinchImageView
+                        android:id="@+id/imageViewCanny"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginTop="100dp"
+                        android:background="#aa0000"
+                        android:scaleType="fitCenter"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintRight_toRightOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+                </LinearLayout>
+
                 <!--解析的最终棋盘-->
                 <LinearLayout
                     android:id="@+id/boardUI"
@@ -174,25 +194,25 @@
                 </LinearLayout>
 
                 <!--黑白图-->
-                <LinearLayout
-                    android:id="@+id/boardBitmap"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical">
+                <!--<LinearLayout-->
+                    <!--android:id="@+id/boardBitmap"-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="match_parent"-->
+                    <!--android:orientation="vertical">-->
 
 
-                    <com.extensions.PinchImageView
-                        android:id="@+id/imageView"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_marginTop="100dp"
-                        android:background="#aa0000"
-                        android:scaleType="fitCenter"
-                        app:layout_constraintLeft_toLeftOf="parent"
-                        app:layout_constraintRight_toRightOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-                </LinearLayout>
+                    <!--<com.extensions.PinchImageView-->
+                        <!--android:id="@+id/imageView"-->
+                        <!--android:layout_width="wrap_content"-->
+                        <!--android:layout_height="wrap_content"-->
+                        <!--android:layout_gravity="center"-->
+                        <!--android:layout_marginTop="100dp"-->
+                        <!--android:background="#aa0000"-->
+                        <!--android:scaleType="fitCenter"-->
+                        <!--app:layout_constraintLeft_toLeftOf="parent"-->
+                        <!--app:layout_constraintRight_toRightOf="parent"-->
+                        <!--app:layout_constraintTop_toTopOf="parent" />-->
+                <!--</LinearLayout>-->
 
             </FrameLayout>
         </LinearLayout>

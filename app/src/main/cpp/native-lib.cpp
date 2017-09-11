@@ -105,3 +105,24 @@ JNIEXPORT void JNICALL Java_com_go_algorithm_Detector_GetCircle //黑白图+圆
     GetCircle(&img);
     AndroidBitmap_unlockPixels(env, bitmap);
 }
+
+JNIEXPORT void JNICALL Java_com_go_algorithm_Detector_GetCanny //黑白图+圆
+        (JNIEnv *env, jclass thizz, jobject bitmap) {
+    AndroidBitmapInfo info;
+    void *pixels;
+
+    CV_Assert(AndroidBitmap_getInfo(env, bitmap, &info) >= 0);
+    CV_Assert(info.format == ANDROID_BITMAP_FORMAT_RGBA_8888 ||
+              info.format == ANDROID_BITMAP_FORMAT_RGB_565);
+    CV_Assert(AndroidBitmap_lockPixels(env, bitmap, &pixels) >= 0);
+    CV_Assert(pixels);
+
+    Mat img;
+    if (info.format == ANDROID_BITMAP_FORMAT_RGBA_8888) {
+        img = Mat(info.height, info.width, CV_8UC4, pixels);
+    } else {
+        img = Mat(info.height, info.width, CV_8UC2, pixels);
+    }
+    GetCanny(&img);
+    AndroidBitmap_unlockPixels(env, bitmap);
+}

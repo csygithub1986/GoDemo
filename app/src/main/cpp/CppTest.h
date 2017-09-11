@@ -110,6 +110,8 @@ void GetGrid(Mat*);//黑白图+网格
 
 void GetCircle(Mat*);//黑白图+圆
 
+void GetCanny(Mat*);//canny
+
 
 
 

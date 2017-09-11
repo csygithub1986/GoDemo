@@ -28,6 +28,9 @@ JNIEXPORT void JNICALL Java_com_go_algorithm_Detector_GetGrid //黑白图+网格
 JNIEXPORT void JNICALL Java_com_go_algorithm_Detector_GetCircle //黑白图+圆
         (JNIEnv *, jclass, jobject);
 
+JNIEXPORT void JNICALL Java_com_go_algorithm_Detector_GetCanny //canny
+        (JNIEnv *, jclass, jobject);
+
 #ifdef __cplusplus
 }
 #endif
