@@ -38,11 +38,8 @@ bool Detect(Mat img, int w, int h, int channel, int boardSize, int result[]) {
     MinGridWidth = (int) (MaxGridWidth * MinWidthRate);
     CrossDetectLen = MinGridWidth / 4;
 
-//    LOGD("c++检测,ImageWidth: %d",ImageWidth);
-//    LOGD("c++检测,ImageHeight: %d",ImageHeight);
-    LOGD("c++检测,MaxGridWidth: %d", MaxGridWidth);
-    LOGD("c++检测,MinGridWidth: %d", MinGridWidth);
-//    LOGD("c++检测,CrossDetectLen: %d",CrossDetectLen);
+//    LOGD("c++检测,MaxGridWidth: %d", MaxGridWidth);
+//    LOGD("c++检测,MinGridWidth: %d", MinGridWidth);
 
     //初始化，灰度、降噪
     GrayBlurImage = InitImage(img);
@@ -51,19 +48,6 @@ bool Detect(Mat img, int w, int h, int channel, int boardSize, int result[]) {
     //第三、四个参数分别为边缘检测阈值和连接阈值（大于第一个作为边界，小于第二个舍弃，介于之间时看该点是否连接着其他边界点）
     cv::Canny(GrayBlurImage, CannyEdges, CannyThreshold, CannyThreshold2);
 
-//    uchar *psrc3 = (uchar *) CannyEdges.data;
-//    vector<int> temp3;
-//    int leng3 = CannyEdges.total();
-//    for (int i = 0; i < leng3; ++i) {
-//        temp3.push_back((int) psrc3[i]);
-//    }
-//
-//    int lll = 0;
-//    for (int i = 0; i < temp3.size(); ++i) {
-//        if (temp3[i] != 0)
-//            lll++;
-//    }
-//    LOGD("canny个数： %d", lll);
 
     CrossPoints = DetectCross(CannyEdges.data, w, h);
 //    LOGD("图形解析，交叉点个数： %d", CrossPoints.size());
@@ -78,20 +62,20 @@ bool Detect(Mat img, int w, int h, int channel, int boardSize, int result[]) {
     //斜率必须满足条件
     if (directionLeft.y == 0 || directionRight.y == 0 || directionUp.x == 0 ||
         directionDown.x == 0) {
-        LOGD("斜率除数为0");
+//        LOGD("斜率除数为0");
         return false;
     }
     if (abs(directionLeft.x / directionLeft.y) > 0.08f ||
         abs(directionRight.x / directionRight.y) > 0.08f ||
         abs(directionUp.y / directionUp.x) > 0.08f ||
         abs(directionDown.y / directionDown.x) > 0.08f) {
-        LOGD("斜率不满足");
+//        LOGD("斜率不满足");
         return false;
     }
 
     //如果找角没找到，返回false
     if (Conors == nullptr) {
-        LOGD("没找到角");
+//        LOGD("没找到角");
         return false;
     }
     int small = MinGridWidth / 2;
@@ -109,7 +93,7 @@ bool Detect(Mat img, int w, int h, int channel, int boardSize, int result[]) {
         Conors[2].y < bigMinY ||
         Conors[3].x < small || Conors[3].x > big || Conors[3].y > bigMaxY ||
         Conors[3].y < bigMinY) {
-        LOGD("角超出范围");
+//        LOGD("角超出范围");
         return false;
     }
 
@@ -1019,7 +1003,7 @@ int FindStone(int index, uchar *cannyBytes, uchar *grayImageData) {
         } else {
             //Console.Write("有圆   ");
             realCircle = true;
-            LOGD("有圆 %d,%d", indexX + 1, indexY + 1);
+//            LOGD("有圆 %d,%d", indexX + 1, indexY + 1);
 
         }
 
@@ -1077,7 +1061,7 @@ int FindStone(int index, uchar *cannyBytes, uchar *grayImageData) {
                 if (type == Center) {
                     //Console.Write("  找到十字");
                     //Console.WriteLine("  (" + indexX + "," + indexY + ")");
-                    LOGD("找到十字 %d,%d", indexX + 1, indexY + 1);
+//                    LOGD("找到十字 %d,%d", indexX + 1, indexY + 1);
 
                     return 0;//空
                 }
@@ -1105,13 +1089,13 @@ int FindStone(int index, uchar *cannyBytes, uchar *grayImageData) {
         float averageGray = totalGray / totalCount;
         if (averageGray > 0.8)//白的灰度一般在0.6以上
         {
-            LOGD("  强行灰度为白  灰度 %.2f %d,%d", averageGray, indexX + 1, indexY + 1);
+//            LOGD("  强行灰度为白  灰度 %.2f %d,%d", averageGray, indexX + 1, indexY + 1);
             return 2;//白
         } else if (averageGray < 0.12)//黑的灰度一般在0.2以下
         {
             //Console.Write("  强行灰度为黑" + "  灰度" + averageGray.ToString("F2"));
             //Console.WriteLine("  (" + indexX + "," + indexY + ")");
-            LOGD("  强行灰度为黑  灰度 %.2f %d,%d", averageGray, indexX + 1, indexY + 1);
+//            LOGD("  强行灰度为黑  灰度 %.2f %d,%d", averageGray, indexX + 1, indexY + 1);
             return 1;//黑
         } else {
             //Console.Write("  强行灰度为空");

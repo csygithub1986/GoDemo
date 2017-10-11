@@ -16,22 +16,15 @@
 
 package com.mining.app.zxing.decoding;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.util.Vector;
 
-import android.app.Activity;
-import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
 import com.example.godemo.GlobalEnvironment;
-import com.example.godemo.ResultActivity;
 import com.example.godemo.ScanActivity;
 import com.example.godemo.R;
 import com.go.algorithm.Detector;
@@ -49,13 +42,6 @@ public final class CaptureActivityHandler extends Handler {
 
     private final ScanActivity activity;
     private final DecodeThread decodeThread;
-    private State state;
-
-    private enum State {
-        PREVIEW,
-        SUCCESS,
-        DONE
-    }
 
     public CaptureActivityHandler(ScanActivity activity, Vector<BarcodeFormat> decodeFormats,
                                   String characterSet) {
@@ -63,7 +49,6 @@ public final class CaptureActivityHandler extends Handler {
         decodeThread = new DecodeThread(activity, decodeFormats, characterSet,
                 new ViewfinderResultPointCallback(activity.getViewfinderView()));
         decodeThread.start();
-        state = State.SUCCESS;
         // Start ourselves capturing previews and decoding.
         CameraManager.get().startPreview();
         restartPreviewAndDecode();
@@ -81,49 +66,13 @@ public final class CaptureActivityHandler extends Handler {
                 //Log.d(TAG, "Got auto-focus message");
                 // When one auto focus pass finishes, start another. This is the closest thing to
                 // continuous AF. It does seem to hunt a bit, but I'm not sure what else to do.
-                if (state == State.PREVIEW) {
-                    CameraManager.get().requestAutoFocus(this, R.id.auto_focus);
-                }
+                CameraManager.get().requestAutoFocus(this, R.id.auto_focus);
                 break;
-            case R.id.restart_preview:
-                Log.d(TAG, "Got restart preview message");
-                restartPreviewAndDecode();
-                break;
-            case R.id.decode_succeeded:
-                Log.d(TAG, "Got decode succeeded message");
-                state = State.SUCCESS;
+            case R.id.goImageDetect:
                 Bundle bundle = message.getData();
 
                 /***********************************************************************/
-                Bitmap img = bundle == null ? null :
-                        (Bitmap) bundle.getParcelable(DecodeThread.BARCODE_BITMAP);
-
-                activity.handleDecode((Result) message.obj, img);//���ؽ��?        /***********************************************************************/
-                break;
-            case R.id.decode_failed:
-                // We're decoding as fast as possible, so when one decode fails, start another.
-                state = State.PREVIEW;
-                CameraManager.get().requestPreviewFrame(decodeThread.getHandler(), R.id.decode);
-                break;
-            case R.id.return_scan_result:
-                Log.d(TAG, "Got return scan result message");
-                activity.setResult(Activity.RESULT_OK, (Intent) message.obj);
-                activity.finish();
-                break;
-            case R.id.launch_product_query:
-                Log.d(TAG, "Got product query message");
-                String url = (String) message.obj;
-                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
-                activity.startActivity(intent);
-                break;
-            //csy
-            case R.id.goDetectSucceed:
-                bundle = message.getData();
-
-                /***********************************************************************/
-                img = bundle == null ? null :
-                        (Bitmap) bundle.getParcelable(DecodeThread.BARCODE_BITMAP);
+                Bitmap img = bundle == null ? null : (Bitmap) bundle.getParcelable(DecodeThread.BARCODE_BITMAP);
 
 
                 //解析图片，如果失败，不采纳
@@ -131,37 +80,22 @@ public final class CaptureActivityHandler extends Handler {
 
                 int[] result = Detector.Detect(img, img.getWidth(), img.getHeight(), 19);
                 long end = System.currentTimeMillis();
-                Log.d(TAG, "c++ Detect图像  (" + (end - start) + " ms):\n");
+//                Log.d(TAG, "c++ Detect图像  (" + (end - start) + " ms):\n");
                 if (result == null) {
-                    state = State.PREVIEW;
                     CameraManager.get().requestPreviewFrame(decodeThread.getHandler(), R.id.decode);
-//                    Log.d("detect", "不采纳");
-//                    try {
-//                        Thread.sleep(3500);
-//                    } catch (InterruptedException e) {
-//                        e.printStackTrace();
-//                    }
+                    GlobalEnvironment.Data = new int[0];
+                    activity.DetectFailCallback();
                     return;
-//                restartPreviewAndDecode();
                 }
                 GlobalEnvironment.ScanedBitmap = img;
                 GlobalEnvironment.Data = result;
-//                for (int i = 0; i < result.length; i++) {
-//                    if (result[i] > 0) {
-//                        int x = i % 19 + 1;
-//                        int y = i / 19 + 1;
-//                        Log.d(TAG, "stone：" + x + "," + y + ":" + result[i]);
-//                    }
-//                }
 
-
-                activity.handleGoDetect((Result) message.obj, img);
+                activity.DetectSuccessCallback();
                 break;
         }
     }
 
     public void quitSynchronously() {
-        state = State.DONE;
         CameraManager.get().stopPreview();
         Message quit = Message.obtain(decodeThread.getHandler(), R.id.quit);
         quit.sendToTarget();
@@ -171,9 +105,6 @@ public final class CaptureActivityHandler extends Handler {
             // continue
         }
 
-        // Be absolutely sure we don't send any queued up messages
-        removeMessages(R.id.decode_succeeded);
-        removeMessages(R.id.decode_failed);
     }
 
 
@@ -181,12 +112,9 @@ public final class CaptureActivityHandler extends Handler {
      *
      */
     private void restartPreviewAndDecode() {
-        if (state == State.SUCCESS) {
-            state = State.PREVIEW;
-            CameraManager.get().requestPreviewFrame(decodeThread.getHandler(), R.id.decode);
-            CameraManager.get().requestAutoFocus(this, R.id.auto_focus);
-            activity.drawViewfinder();
-        }
+        CameraManager.get().requestPreviewFrame(decodeThread.getHandler(), R.id.decode);
+        CameraManager.get().requestAutoFocus(this, R.id.auto_focus);
+        activity.drawViewfinder();
     }
 
 }

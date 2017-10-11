@@ -16,9 +16,11 @@
 
 package com.mining.app.zxing.camera;
 
+import com.example.godemo.GlobalEnvironment;
 import com.google.zxing.LuminanceSource;
 
 import android.graphics.Bitmap;
+import android.os.Bundle;
 
 /**
  * This object extends LuminanceSource around an array of YUV data returned from the camera driver,
@@ -108,10 +110,15 @@ public final class PlanarYUVLuminanceSource extends LuminanceSource {
         return dataHeight;
     }
 
+    /**
+     * 产生切割过后的图像
+     * @return
+     */
     public Bitmap renderCroppedGreyscaleBitmap() {
         int width = getWidth();
         int height = getHeight();
         int[] pixels = new int[width * height];
+        byte[] bytePixels=new byte[width * height];
         byte[] yuv = yuvData;
         int inputOffset = top * dataWidth + left;
 
@@ -120,10 +127,12 @@ public final class PlanarYUVLuminanceSource extends LuminanceSource {
             for (int x = 0; x < width; x++) {
                 int grey = yuv[inputOffset + x] & 0xff;
                 pixels[outputOffset + x] = 0xFF000000 | (grey * 0x00010101);
+                bytePixels[outputOffset + x]=yuv[inputOffset + x];
             }
             inputOffset += dataWidth;
         }
 
+        GlobalEnvironment.BitmapBytes=bytePixels;
         Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         bitmap.setPixels(pixels, 0, width, 0, 0, width, height);
         return bitmap;

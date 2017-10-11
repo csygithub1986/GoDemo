@@ -3,6 +3,7 @@ package com.tcp;
 
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
@@ -23,7 +24,7 @@ public class TcpClient {
         return m_Instance;
     }
 
-    private static final String HOST = "192.168.1.100";
+    private static final String HOST = "192.168.1.111";
     private static final int PORT = 12121;
     private Socket socket = null;
 
@@ -53,9 +54,18 @@ public class TcpClient {
         new Thread(new DataListener()).start();
     }
 
+    public void Send(byte[] data) {
+        try {
+            if (dos == null || socket.isClosed())
+                return;
+            dos.write(data);
+            dos.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     class DataListener implements Runnable {
-
         @Override
         public void run() {
             try {
@@ -63,8 +73,15 @@ public class TcpClient {
                     if (!socket.isClosed()) {
                         if (socket.isConnected()) {
                             if (!socket.isInputShutdown()) {
+
                                 byte[] intBytes = new byte[4];
-                            int x=    dis.read(intBytes);
+                                int x = dis.read(intBytes);
+
+                                if (x == -1) {
+                                    Log.i("debug", "返回-1");
+                                    return;
+                                }
+
                                 int command = FormatTransfer.lBytesToInt(intBytes);
                                 if (command == CommonDataDefine.GameStart) {
                                     dis.read(intBytes);
@@ -74,7 +91,7 @@ public class TcpClient {
                                     String msg = new String(msgBytes, "utf-8");
                                     if (m_Handler != null) {
                                         Message message = new Message();
-                                        message.what=CommonDataDefine.GameStart;
+                                        message.what = CommonDataDefine.GameStart;
                                         message.obj = msg;
                                         m_Handler.sendMessage(message);
                                     }

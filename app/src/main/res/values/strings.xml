@@ -6,4 +6,8 @@
     <string name="menu_settings">Settings</string>
 
     <string name="scan_text">尽量将棋盘四边与扫描框保持平行</string>
+
+    <!--<string name="scanType">scanType</string>-->
+    <!--<string name="goScan">goScan</string>-->
+    <!--<string name="partner">partner</string>-->
 </resources>

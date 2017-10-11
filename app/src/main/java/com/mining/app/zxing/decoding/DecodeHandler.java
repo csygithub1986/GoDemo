@@ -132,17 +132,14 @@ final class DecodeHandler extends Handler {
         Bitmap bitmap = source.renderCroppedGreyscaleBitmap();
 
         long end = System.currentTimeMillis();
-        Log.d(TAG, "生成bitmap  (" + (end - start) + " ms):\n");
+//        Log.d(TAG, "生成bitmap  (" + (end - start) + " ms):\n");
         //endregion
 
-
-        Message message = Message.obtain(activity.getHandler(), R.id.goDetectSucceed, null);
+        Message message = Message.obtain(activity.getHandler(), R.id.goImageDetect, null);
         Bundle bundle = new Bundle();
         bundle.putParcelable(DecodeThread.BARCODE_BITMAP, bitmap);
         message.setData(bundle);
         message.sendToTarget();
-
-
     }
 
 }

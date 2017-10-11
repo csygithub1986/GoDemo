@@ -58,7 +58,7 @@ public class PartnerClientActivity extends AppCompatActivity implements SurfaceH
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_partner_client);
+//        setContentView(R.layout.activity_partner_client);
 
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         CameraManager.init(getApplication());
@@ -100,7 +100,7 @@ public class PartnerClientActivity extends AppCompatActivity implements SurfaceH
             return;
         }
         if (handler == null) {
-            handler = new CaptureActivityHandler(this, null, null);
+//            handler = new CaptureActivityHandler(this, null, null);
         }
     }
 

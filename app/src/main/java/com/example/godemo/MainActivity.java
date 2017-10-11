@@ -19,6 +19,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent();
+                intent.putExtra("scanType",EScanType.GoScan.ordinal());
                 intent.setClass(MainActivity.this, ScanActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
@@ -30,7 +31,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent();
-                intent.setClass(MainActivity.this, PartnerClientActivity.class);
+                intent.putExtra("scanType",EScanType.Partner.ordinal());
+                intent.setClass(MainActivity.this, ScanActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
             }

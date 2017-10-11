@@ -43,17 +43,14 @@ final class PreviewCallback implements Camera.PreviewCallback {
 
 
     public void onPreviewFrame(byte[] data, Camera camera) {
-        Log.d("mydebug", "data大小：" + data.length);
+//        Log.d("mydebug", "data大小：" + data.length);
         Point cameraResolution = configManager.getCameraResolution();
         if (!useOneShotPreviewCallback) {
             camera.setPreviewCallback(null);
         }
         if (previewHandler != null) {
-            Message message = previewHandler.obtainMessage(previewMessage, cameraResolution.x,
-                    cameraResolution.y, data);
+            Message message = previewHandler.obtainMessage(previewMessage, cameraResolution.x, cameraResolution.y, data);
             //生成bitmap
-
-
             message.sendToTarget();
             previewHandler = null;
         } else {

@@ -7,8 +7,10 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.os.Vibrator;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.WindowManager;
@@ -21,8 +23,14 @@ import com.mining.app.zxing.camera.CameraManager;
 import com.mining.app.zxing.decoding.CaptureActivityHandler;
 import com.mining.app.zxing.decoding.InactivityTimer;
 import com.mining.app.zxing.view.ViewfinderView;
+import com.tcp.CommonDataDefine;
+import com.tcp.FormatTransfer;
+import com.tcp.TcpClient;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Vector;
 
 public class ScanActivity extends AppCompatActivity implements SurfaceHolder.Callback {
@@ -30,13 +38,42 @@ public class ScanActivity extends AppCompatActivity implements SurfaceHolder.Cal
     private CaptureActivityHandler handler;
     private ViewfinderView viewfinderView;
     private boolean hasSurface;
-    private Vector<BarcodeFormat> decodeFormats;
-    private String characterSet;
-    private InactivityTimer inactivityTimer;
+    //    private InactivityTimer inactivityTimer;
     private MediaPlayer mediaPlayer;
     private boolean playBeep;
     private static final float BEEP_VOLUME = 0.10f;
     private boolean vibrate;
+
+    private EScanType ScanType;
+
+    private Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what) {
+                case CommonDataDefine.NetConnected:
+                    Toast.makeText(ScanActivity.this, "已连接", Toast.LENGTH_SHORT).show();
+                    break;
+                case CommonDataDefine.GameStart:
+                    String str = (String) msg.obj;
+//                    String[] propertys = str.split(";");
+//                    for (int i = 0; i < propertys.length; i++) {
+//                        String[] items=propertys[i].split("=");
+//                    }
+                    Toast.makeText(ScanActivity.this, str, Toast.LENGTH_SHORT).show();
+
+                    break;
+                case CommonDataDefine.GameOver:
+                    break;
+                case CommonDataDefine.Scan:
+                    break;
+                case CommonDataDefine.ServerStepData:
+                    break;
+                case CommonDataDefine.SendPreview:
+                    break;
+            }
+        }
+    };
 
 
     @Override
@@ -44,16 +81,26 @@ public class ScanActivity extends AppCompatActivity implements SurfaceHolder.Cal
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scan);
 
-        this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
+        int type = getIntent().getIntExtra("scanType", 0);
+        if (type == EScanType.GoScan.ordinal())
+            ScanType = EScanType.GoScan;
+        else if (type == EScanType.Partner.ordinal()) {
+            ScanType = EScanType.Partner;
+            //网络
+            TcpClient.getInstance().setHandler(mHandler);
+            //启动连接
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    TcpClient.getInstance().start();
+                }
+            }).start();
+        }
+        this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         CameraManager.init(getApplication());
         viewfinderView = (ViewfinderView) findViewById(R.id.viewfinder_view);
-
         hasSurface = false;
-        inactivityTimer = new InactivityTimer(this);//这是什么
-
-//        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.test);
-//        GlobalEnvironment.ScanedBitmap=bitmap;
     }
 
     @Override
@@ -67,17 +114,18 @@ public class ScanActivity extends AppCompatActivity implements SurfaceHolder.Cal
             surfaceHolder.addCallback(this);
             surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
         }
-        decodeFormats = null;
-        characterSet = null;
 
-        playBeep = true;
-        AudioManager audioService = (AudioManager) getSystemService(AUDIO_SERVICE);
-        if (audioService.getRingerMode() != AudioManager.RINGER_MODE_NORMAL) {
-            playBeep = false;
+        playBeep = false;
+        if (playBeep) {
+            AudioManager audioService = (AudioManager) getSystemService(AUDIO_SERVICE);
+            if (audioService.getRingerMode() != AudioManager.RINGER_MODE_NORMAL) {
+                playBeep = false;
+            }
         }
-        initBeepSound();
-        vibrate = true;
-
+        vibrate = false;
+        if (vibrate) {
+            initBeepSound();
+        }
     }
 
 
@@ -93,7 +141,6 @@ public class ScanActivity extends AppCompatActivity implements SurfaceHolder.Cal
 
     @Override
     protected void onDestroy() {
-        inactivityTimer.shutdown();
         super.onDestroy();
     }
 
@@ -104,7 +151,6 @@ public class ScanActivity extends AppCompatActivity implements SurfaceHolder.Cal
      * @param barcode
      */
     public void handleDecode(Result result, Bitmap barcode) {
-        inactivityTimer.onActivity();
         playBeepSoundAndVibrate();
         String resultString = result.getText();
         if (resultString.equals("")) {
@@ -120,13 +166,95 @@ public class ScanActivity extends AppCompatActivity implements SurfaceHolder.Cal
         ScanActivity.this.finish();
     }
 
-    public void handleGoDetect(Result result, Bitmap barcode) {
-        inactivityTimer.onActivity();
-        Intent resultIntent = new Intent();
-        resultIntent.setClass(ScanActivity.this, ResultActivity.class);
-        startActivity(resultIntent);
-        ScanActivity.this.finish();
+    public void DetectSuccessCallback() {
+        if (ScanType == EScanType.GoScan) {
+            Intent resultIntent = new Intent();
+            resultIntent.setClass(ScanActivity.this, ResultActivity.class);
+            startActivity(resultIntent);
+            ScanActivity.this.finish();
+        } else if (ScanType == EScanType.Partner) {
+            //总长度 =头+两个数组长度+两个长度int+一个是否成功
+            int totalLen = 4 + GlobalEnvironment.BitmapBytes.length + GlobalEnvironment.Data.length + 4 + 4 + 1;
+            byte[] sendData = new byte[totalLen + 4];
+            int index = 0;
+            //数据总长度
+            CopyLHInt(sendData, index, totalLen);
+            index += 4;
+            //头
+            CopyLHInt(sendData, index, CommonDataDefine.PreviewData);
+            index += 4;
+            //是否成功
+            sendData[index] = 1;
+            index += 1;
+            //图像数据
+            CopyLHInt(sendData, index, GlobalEnvironment.BitmapBytes.length);
+            index += 4;
+            CopyByte(sendData, index, GlobalEnvironment.BitmapBytes);
+            index += GlobalEnvironment.BitmapBytes.length;
+
+            //解析数据
+            CopyLHInt(sendData, index, GlobalEnvironment.Data.length);
+            index += 4;
+            CopyByte(sendData, index, GlobalEnvironment.Data);
+            index += GlobalEnvironment.Data.length;
+
+            TcpClient.getInstance().Send(sendData);
+        }
     }
+
+    public void DetectFailCallback() {
+        if (ScanType == EScanType.GoScan) {
+        } else if (ScanType == EScanType.Partner) {
+            //总长度   两个数组长度+两个长度int+一个是否成功
+            int totalLen = 4 + GlobalEnvironment.BitmapBytes.length + GlobalEnvironment.Data.length + 4 + 4 + 1;
+            Log.i("总长度", "" + totalLen);
+            byte[] sendData = new byte[totalLen + 4];
+            int index = 0;
+            //数据总长度
+            CopyLHInt(sendData, index, totalLen);
+            index += 4;
+            //头
+            CopyLHInt(sendData, index, CommonDataDefine.PreviewData);
+            index += 4;
+
+            //是否成功
+            sendData[index] = 0;
+            index += 1;
+            //图像数据
+            CopyLHInt(sendData, index, GlobalEnvironment.BitmapBytes.length);
+            index += 4;
+            CopyByte(sendData, index, GlobalEnvironment.BitmapBytes);
+            index += GlobalEnvironment.BitmapBytes.length;
+
+            //解析数据
+            CopyLHInt(sendData, index, GlobalEnvironment.Data.length);
+            index += 4;
+            CopyByte(sendData, index, GlobalEnvironment.Data);
+            index += GlobalEnvironment.Data.length;
+
+            TcpClient.getInstance().Send(sendData);
+        }
+    }
+
+    private void CopyLHInt(byte[] byteData, int index, int intData) {
+        byte[] intByteData = FormatTransfer.toLH(intData);
+        for (int i = 0; i < intByteData.length; i++) {
+            byteData[index + i] = intByteData[i];
+        }
+    }
+
+    private void CopyByte(byte[] byteData, int index, byte[] copyData) {
+        for (int i = 0; i < copyData.length; i++) {
+            byteData[index + i] = copyData[i];
+        }
+    }
+
+    private void CopyByte(byte[] byteData, int index, int[] copyData) {
+        for (int i = 0; i < copyData.length; i++) {
+            byteData[index + i] = (byte) copyData[i];
+        }
+    }
+
 
     private void initCamera(SurfaceHolder surfaceHolder) {
         try {
@@ -137,7 +265,7 @@ public class ScanActivity extends AppCompatActivity implements SurfaceHolder.Cal
             return;
         }
         if (handler == null) {
-            handler = new CaptureActivityHandler(this, decodeFormats, characterSet);
+            handler = new CaptureActivityHandler(this, null, null);
         }
     }
 
@@ -152,7 +280,6 @@ public class ScanActivity extends AppCompatActivity implements SurfaceHolder.Cal
             hasSurface = true;
             initCamera(holder);
         }
-
     }
 
     @Override

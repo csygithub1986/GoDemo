@@ -1,5 +1,9 @@
 package com.tcp;
 
+import com.example.godemo.GlobalEnvironment;
+
+import java.util.List;
+
 /**
  * 通信格式转换
  * <p>
