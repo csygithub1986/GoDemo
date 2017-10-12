@@ -16,9 +16,13 @@
 
 package com.mining.app.zxing.decoding;
 
+import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
 import java.util.Vector;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -74,6 +78,12 @@ public final class CaptureActivityHandler extends Handler {
                 /***********************************************************************/
                 Bitmap img = bundle == null ? null : (Bitmap) bundle.getParcelable(DecodeThread.BARCODE_BITMAP);
 
+                //压缩图片，传给PC
+                Bitmap smallImg = zoomImg(img, img.getWidth() / 3, img.getHeight() / 3);
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                // 把压缩后的数据存放到baos中
+                smallImg.compress(Bitmap.CompressFormat.JPEG, 80, baos);
+                GlobalEnvironment.BitmapBytes = baos.toByteArray();
 
                 //解析图片，如果失败，不采纳
                 long start = System.currentTimeMillis();
@@ -94,6 +104,23 @@ public final class CaptureActivityHandler extends Handler {
                 break;
         }
     }
+
+
+    private Bitmap zoomImg(Bitmap bm, int newWidth, int newHeight) {
+        // 获得图片的宽高
+        int width = bm.getWidth();
+        int height = bm.getHeight();
+        // 计算缩放比例
+        float scaleWidth = ((float) newWidth) / width;
+        float scaleHeight = ((float) newHeight) / height;
+        // 取得想要缩放的matrix参数
+        Matrix matrix = new Matrix();
+        matrix.postScale(scaleWidth, scaleHeight);
+        // 得到新的图片
+        Bitmap newbm = Bitmap.createBitmap(bm, 0, 0, width, height, matrix, true);
+        return newbm;
+    }
+
 
     public void quitSynchronously() {
         CameraManager.get().stopPreview();
