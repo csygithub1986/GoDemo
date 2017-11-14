@@ -10,4 +10,7 @@ public class GlobalEnvironment {
     public static Bitmap ScanedBitmap;
     public static int[] Data;
     public static byte[] BitmapBytes;
+
+    public static boolean IsSendImageToPC;
+    public static EScanType ScanType;
 }

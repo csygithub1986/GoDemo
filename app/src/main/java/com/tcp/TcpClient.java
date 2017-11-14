@@ -4,12 +4,9 @@ package com.tcp;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
 
 import java.io.*;
 import java.net.Socket;
-import java.nio.charset.Charset;
 
 public class TcpClient {
     private static TcpClient m_Instance;
@@ -45,7 +42,7 @@ public class TcpClient {
             socket = new Socket(HOST, PORT);
             dis = new DataInputStream(socket.getInputStream());
             dos = new DataOutputStream(socket.getOutputStream());
-            m_Handler.sendEmptyMessage(CommonDataDefine.NetConnected);
+            m_Handler.sendEmptyMessage(TcpHeaderDefine.NetConnected);
         } catch (IOException ex) {
             ex.printStackTrace();
 //            ShowDialog("login exception" + ex.getMessage());
@@ -83,7 +80,7 @@ public class TcpClient {
                                 }
 
                                 int command = FormatTransfer.lBytesToInt(intBytes);
-                                if (command == CommonDataDefine.GameStart) {
+                                if (command == TcpHeaderDefine.GameStart) {
                                     dis.read(intBytes);
                                     int len = FormatTransfer.lBytesToInt(intBytes);
                                     byte[] msgBytes = new byte[len];
@@ -91,18 +88,18 @@ public class TcpClient {
                                     String msg = new String(msgBytes, "utf-8");
                                     if (m_Handler != null) {
                                         Message message = new Message();
-                                        message.what = CommonDataDefine.GameStart;
+                                        message.what = TcpHeaderDefine.GameStart;
                                         message.obj = msg;
                                         m_Handler.sendMessage(message);
                                     }
-                                } else if (command == CommonDataDefine.GameOver) {
+                                } else if (command == TcpHeaderDefine.GameOver) {
 
 
-                                } else if (command == CommonDataDefine.Scan) {
+                                } else if (command == TcpHeaderDefine.Scan) {
 
-                                } else if (command == CommonDataDefine.SendPreview) {
+                                } else if (command == TcpHeaderDefine.SendPreview) {
 
-                                } else if (command == CommonDataDefine.ServerStepData) {
+                                } else if (command == TcpHeaderDefine.HostStepData) {
 
                                 }
                             }

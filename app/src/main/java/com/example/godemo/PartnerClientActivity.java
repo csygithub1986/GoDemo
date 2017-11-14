@@ -1,6 +1,5 @@
 package com.example.godemo;
 
-import android.media.AudioManager;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
@@ -13,12 +12,10 @@ import android.widget.Toast;
 import com.mining.app.zxing.camera.CameraManager;
 import com.mining.app.zxing.decoding.CaptureActivityHandler;
 import com.mining.app.zxing.view.ViewfinderView;
-import com.tcp.CommonDataDefine;
+import com.tcp.TcpHeaderDefine;
 import com.tcp.TcpClient;
 
 import java.io.IOException;
-
-import static com.tcp.CommonDataDefine.*;
 
 public class PartnerClientActivity extends AppCompatActivity implements SurfaceHolder.Callback {
 
@@ -30,28 +27,28 @@ public class PartnerClientActivity extends AppCompatActivity implements SurfaceH
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
-            switch (msg.what) {
-                case CommonDataDefine.NetConnected:
-                    Toast.makeText(PartnerClientActivity.this, "已连接", Toast.LENGTH_SHORT).show();
-                    break;
-                case CommonDataDefine.GameStart:
-                    String str = (String) msg.obj;
-//                    String[] propertys = str.split(";");
-//                    for (int i = 0; i < propertys.length; i++) {
-//                        String[] items=propertys[i].split("=");
-//                    }
-                    Toast.makeText(PartnerClientActivity.this, str, Toast.LENGTH_SHORT).show();
-
-                    break;
-                case CommonDataDefine.GameOver:
-                    break;
-                case CommonDataDefine.Scan:
-                    break;
-                case CommonDataDefine.ServerStepData:
-                    break;
-                case CommonDataDefine.SendPreview:
-                    break;
-            }
+//            switch (msg.what) {
+//                case TcpHeaderDefine.NetConnected:
+//                    Toast.makeText(PartnerClientActivity.this, "已连接", Toast.LENGTH_SHORT).show();
+//                    break;
+//                case TcpHeaderDefine.GameStart:
+//                    String str = (String) msg.obj;
+////                    String[] propertys = str.split(";");
+////                    for (int i = 0; i < propertys.length; i++) {
+////                        String[] items=propertys[i].split("=");
+////                    }
+//                    Toast.makeText(PartnerClientActivity.this, str, Toast.LENGTH_SHORT).show();
+//
+//                    break;
+//                case TcpHeaderDefine.GameOver:
+//                    break;
+//                case TcpHeaderDefine.Scan:
+//                    break;
+//                case TcpHeaderDefine.HostStepData:
+//                    break;
+//                case TcpHeaderDefine.SendPreview:
+//                    break;
+//            }
         }
     };
 

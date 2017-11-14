@@ -26,6 +26,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+
         Button btnPlayPartner= (Button) findViewById(R.id.btnPlayPartner);
         btnPlayPartner.setOnClickListener(new View.OnClickListener() {
             @Override

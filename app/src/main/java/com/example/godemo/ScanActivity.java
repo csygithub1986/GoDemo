@@ -9,67 +9,59 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Vibrator;
+import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.WindowManager;
-import android.widget.TabHost;
 import android.widget.Toast;
 
-import com.google.zxing.BarcodeFormat;
 import com.google.zxing.Result;
 import com.mining.app.zxing.camera.CameraManager;
 import com.mining.app.zxing.decoding.CaptureActivityHandler;
-import com.mining.app.zxing.decoding.InactivityTimer;
 import com.mining.app.zxing.view.ViewfinderView;
-import com.tcp.CommonDataDefine;
+import com.tcp.TcpHeaderDefine;
 import com.tcp.FormatTransfer;
 import com.tcp.TcpClient;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Vector;
 
 public class ScanActivity extends AppCompatActivity implements SurfaceHolder.Callback {
 
     private CaptureActivityHandler handler;
     private ViewfinderView viewfinderView;
     private boolean hasSurface;
-    //    private InactivityTimer inactivityTimer;
     private MediaPlayer mediaPlayer;
     private boolean playBeep;
     private static final float BEEP_VOLUME = 0.10f;
     private boolean vibrate;
 
-    private EScanType ScanType;
 
     private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             switch (msg.what) {
-                case CommonDataDefine.NetConnected:
+                case TcpHeaderDefine.NetConnected:
                     Toast.makeText(ScanActivity.this, "已连接", Toast.LENGTH_SHORT).show();
+                    CameraManager.get().startPreview();
+                    handler.restartPreviewAndDecode();
                     break;
-                case CommonDataDefine.GameStart:
-                    String str = (String) msg.obj;
-//                    String[] propertys = str.split(";");
-//                    for (int i = 0; i < propertys.length; i++) {
-//                        String[] items=propertys[i].split("=");
-//                    }
-                    Toast.makeText(ScanActivity.this, str, Toast.LENGTH_SHORT).show();
+                //游戏结束
+                case TcpHeaderDefine.GameOver:
+                    break;
+                //开始扫描
+                case TcpHeaderDefine.StartScan:
+                    break;
+                //到来数据
+                case TcpHeaderDefine.HostStepData:
+                    break;
+                //发送预览图片
+                case TcpHeaderDefine.SendPreviewCommand:
 
-                    break;
-                case CommonDataDefine.GameOver:
-                    break;
-                case CommonDataDefine.Scan:
-                    break;
-                case CommonDataDefine.ServerStepData:
-                    break;
-                case CommonDataDefine.SendPreview:
+
+                    GlobalEnvironment.IsSendImageToPC = true;
                     break;
             }
         }
@@ -84,9 +76,9 @@ public class ScanActivity extends AppCompatActivity implements SurfaceHolder.Cal
 
         int type = getIntent().getIntExtra("scanType", 0);
         if (type == EScanType.GoScan.ordinal())
-            ScanType = EScanType.GoScan;
+            GlobalEnvironment.ScanType = EScanType.GoScan;
         else if (type == EScanType.Partner.ordinal()) {
-            ScanType = EScanType.Partner;
+            GlobalEnvironment.ScanType = EScanType.Partner;
             //网络
             TcpClient.getInstance().setHandler(mHandler);
             //启动连接
@@ -166,23 +158,30 @@ public class ScanActivity extends AppCompatActivity implements SurfaceHolder.Cal
         ScanActivity.this.finish();
     }
 
-    public void DetectSuccessCallback() {
-        if (ScanType == EScanType.GoScan) {
-            Intent resultIntent = new Intent();
-            resultIntent.setClass(ScanActivity.this, ResultActivity.class);
-            startActivity(resultIntent);
-            ScanActivity.this.finish();
-        } else if (ScanType == EScanType.Partner) {
-            //总长度 =头+两个数组长度+两个长度int+一个是否成功
-            int totalLen = 4 + GlobalEnvironment.BitmapBytes.length + GlobalEnvironment.Data.length + 4 + 4 + 1;
+    public void DetectResultCallback(boolean success) {
+        if (GlobalEnvironment.ScanType == EScanType.GoScan) {
+            if (success) {
+                Intent resultIntent = new Intent();
+                resultIntent.setClass(ScanActivity.this, ResultActivity.class);
+                startActivity(resultIntent);
+                ScanActivity.this.finish();
+            }
+        } else if (GlobalEnvironment.ScanType == EScanType.Partner) {
+            //
+//                byte recognized
+
+
+            //头+状态+图像byte[]+棋盘数据byte[]
+            //2   1    4+n            2+n
+            int totalLen = 2 + GlobalEnvironment.BitmapBytes.length + GlobalEnvironment.Data.length + 4 + 2 + 1;
             byte[] sendData = new byte[totalLen + 4];
             int index = 0;
             //数据总长度
             CopyLHInt(sendData, index, totalLen);
             index += 4;
             //头
-            CopyLHInt(sendData, index, CommonDataDefine.PreviewData);
-            index += 4;
+            CopyLHShort(sendData, index, TcpHeaderDefine.PhonePreviewData);
+            index += 2;
             //是否成功
             sendData[index] = 1;
             index += 1;
@@ -202,41 +201,15 @@ public class ScanActivity extends AppCompatActivity implements SurfaceHolder.Cal
         }
     }
 
-    public void DetectFailCallback() {
-        if (ScanType == EScanType.GoScan) {
-        } else if (ScanType == EScanType.Partner) {
-            //总长度   两个数组长度+两个长度int+一个是否成功
-            int totalLen = 4 + GlobalEnvironment.BitmapBytes.length + GlobalEnvironment.Data.length + 4 + 4 + 1;
-            Log.i("总长度", "" + totalLen);
-            byte[] sendData = new byte[totalLen + 4];
-            int index = 0;
-            //数据总长度
-            CopyLHInt(sendData, index, totalLen);
-            index += 4;
-            //头
-            CopyLHInt(sendData, index, CommonDataDefine.PreviewData);
-            index += 4;
 
-            //是否成功
-            sendData[index] = 0;
-            index += 1;
-            //图像数据
-            CopyLHInt(sendData, index, GlobalEnvironment.BitmapBytes.length);
-            index += 4;
-            CopyByte(sendData, index, GlobalEnvironment.BitmapBytes);
-            index += GlobalEnvironment.BitmapBytes.length;
-
-            //解析数据
-            CopyLHInt(sendData, index, GlobalEnvironment.Data.length);
-            index += 4;
-            CopyByte(sendData, index, GlobalEnvironment.Data);
-            index += GlobalEnvironment.Data.length;
-
-            TcpClient.getInstance().Send(sendData);
+    private void CopyLHInt(byte[] byteData, int index, int intData) {
+        byte[] intByteData = FormatTransfer.toLH(intData);
+        for (int i = 0; i < intByteData.length; i++) {
+            byteData[index + i] = intByteData[i];
         }
     }
 
-    private void CopyLHInt(byte[] byteData, int index, int intData) {
+    private void CopyLHShort(byte[] byteData, int index, short intData) {
         byte[] intByteData = FormatTransfer.toLH(intData);
         for (int i = 0; i < intByteData.length; i++) {
             byteData[index + i] = intByteData[i];
@@ -266,6 +239,10 @@ public class ScanActivity extends AppCompatActivity implements SurfaceHolder.Cal
         }
         if (handler == null) {
             handler = new CaptureActivityHandler(this, null, null);
+            if (GlobalEnvironment.ScanType == EScanType.GoScan) {
+                CameraManager.get().startPreview();
+                handler.restartPreviewAndDecode();
+            }
         }
     }
 

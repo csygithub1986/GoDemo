@@ -54,8 +54,8 @@ public final class CaptureActivityHandler extends Handler {
                 new ViewfinderResultPointCallback(activity.getViewfinderView()));
         decodeThread.start();
         // Start ourselves capturing previews and decoding.
-        CameraManager.get().startPreview();
-        restartPreviewAndDecode();
+//        CameraManager.get().startPreview();
+//        restartPreviewAndDecode();
     }
 
     /**
@@ -101,6 +101,8 @@ public final class CaptureActivityHandler extends Handler {
                 GlobalEnvironment.Data = result;
 
                 activity.DetectSuccessCallback();
+
+
                 break;
         }
     }
@@ -138,7 +140,7 @@ public final class CaptureActivityHandler extends Handler {
     /**
      *
      */
-    private void restartPreviewAndDecode() {
+    public void restartPreviewAndDecode() {
         CameraManager.get().requestPreviewFrame(decodeThread.getHandler(), R.id.decode);
         CameraManager.get().requestAutoFocus(this, R.id.auto_focus);
         activity.drawViewfinder();
